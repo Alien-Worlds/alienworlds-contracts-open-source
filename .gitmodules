@@ -1,0 +1,9 @@
+[submodule "contracts/common/contracts-common"]
+	path = contracts/common/contracts-common
+	url = git@github.com:Alien-Worlds/contracts-common.git
+[submodule "contracts/atomicassets-contracts"]
+	path = contracts/atomicassets-contracts
+	url = git@github.com:Alien-Worlds/atomicassets-contracts.git
+[submodule "contracts/eosdac-contracts"]
+	path = contracts/eosdac-contracts
+	url = https://github.com/Alien-Worlds/eosdac-contracts.git

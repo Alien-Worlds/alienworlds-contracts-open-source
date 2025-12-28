@@ -1,0 +1,4 @@
+module.exports = {
+  endpoint: 'http://localhost:8888',
+  atomic_endpoint: 'http://localhost:8888',
+}

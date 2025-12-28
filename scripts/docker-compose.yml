@@ -1,0 +1,16 @@
+version: '3'
+services:
+  dev:
+    image: node:14
+    ports: 
+        - 8800:8800
+    volumes: 
+        - .:/usr/code
+    working_dir: /usr/code
+    networks:
+      - bot_docker_net
+    command: node check-bots.js
+  
+networks:
+    bot_docker_net:
+      driver: bridge

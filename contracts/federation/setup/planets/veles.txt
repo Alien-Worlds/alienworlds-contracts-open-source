@@ -1,0 +1,656 @@
+1,14,LT08,Icy Desert
+1,15,LT08,Icy Desert
+1,16,LT08,Icy Desert
+1,17,LT08,Icy Desert
+1,18,LT08,Icy Desert
+1,19,LT08,Icy Desert
+1,20,LT08,Icy Desert
+1,21,LT08,Icy Desert
+1,22,LT08,Icy Desert
+1,23,LT08,Icy Desert
+1,24,LT08,Icy Desert
+1,25,LT08,Icy Desert
+1,26,LT08,Icy Desert
+1,27,LT08,Icy Desert
+2,8,LT08,Icy Desert
+2,9,LT08,Icy Desert
+2,10,LT08,Icy Desert
+2,11,LT08,Icy Desert
+2,12,LT08,Icy Desert
+2,13,LT08,Icy Desert
+2,14,LT09,Icy Mountains
+2,15,LT09,Icy Mountains
+2,16,LT08,Icy Desert
+2,17,LT08,Icy Desert
+2,18,LT08,Icy Desert
+2,19,LT08,Icy Desert
+2,20,LT08,Icy Desert
+2,21,LT08,Icy Desert
+2,22,LT08,Icy Desert
+2,23,LT08,Icy Desert
+2,24,LT08,Icy Desert
+2,25,LT08,Icy Desert
+2,26,LT08,Icy Desert
+2,27,LT08,Icy Desert
+2,28,LT08,Icy Desert
+2,29,LT08,Icy Desert
+2,30,LT08,Icy Desert
+2,31,LT08,Icy Desert
+2,32,LT08,Icy Desert
+2,33,LT08,Icy Desert
+3,6,LT10,Rocky Coastline
+3,7,LT02,Tree Forest
+3,8,LT02,Tree Forest
+3,9,LT02,Tree Forest
+3,10,LT02,Tree Forest
+3,11,LT02,Tree Forest
+3,12,LT02,Tree Forest
+3,13,LT09,Icy Mountains
+3,14,LT09,Icy Mountains
+3,15,LT09,Icy Mountains
+3,16,LT09,Icy Mountains
+3,17,LT09,Icy Mountains
+3,18,LT08,Icy Desert
+3,19,LT21,Sea (No NFT Required)
+3,20,LT21,Sea (No NFT Required)
+3,21,LT21,Sea (No NFT Required)
+3,22,LT21,Sea (No NFT Required)
+3,23,LT21,Sea (No NFT Required)
+3,24,LT21,Sea (No NFT Required)
+3,25,LT21,Sea (No NFT Required)
+3,26,LT21,Sea (No NFT Required)
+3,27,LT21,Sea (No NFT Required)
+3,28,LT21,Sea (No NFT Required)
+3,29,LT21,Sea (No NFT Required)
+3,30,LT08,Icy Desert
+3,31,LT08,Icy Desert
+3,32,LT09,Icy Mountains
+3,33,LT10,Rocky Coastline
+3,34,LT10,Rocky Coastline
+3,35,LT10,Rocky Coastline
+4,5,LT21,Sea (No NFT Required)
+4,6,LT21,Sea (No NFT Required)
+4,7,LT21,Sea (No NFT Required)
+4,8,LT10,Rocky Coastline
+4,9,LT02,Tree Forest
+4,10,LT14,River
+4,11,LT14,River
+4,12,LT02,Tree Forest
+4,13,LT02,Tree Forest
+4,14,LT02,Tree Forest
+4,15,LT02,Tree Forest
+4,16,LT08,Icy Desert
+4,17,LT08,Icy Desert
+4,18,LT21,Sea (No NFT Required)
+4,19,LT21,Sea (No NFT Required)
+4,20,LT21,Sea (No NFT Required)
+4,21,LT21,Sea (No NFT Required)
+4,22,LT21,Sea (No NFT Required)
+4,23,LT21,Sea (No NFT Required)
+4,24,LT02,Tree Forest
+4,25,LT15,Active Volcano
+4,26,LT02,Tree Forest
+4,27,LT21,Sea (No NFT Required)
+4,28,LT21,Sea (No NFT Required)
+4,29,LT21,Sea (No NFT Required)
+4,30,LT21,Sea (No NFT Required)
+4,31,LT21,Sea (No NFT Required)
+4,32,LT21,Sea (No NFT Required)
+4,33,LT21,Sea (No NFT Required)
+4,34,LT10,Rocky Coastline
+4,35,LT10,Rocky Coastline
+4,36,LT21,Sea (No NFT Required)
+5,4,LT21,Sea (No NFT Required)
+5,5,LT21,Sea (No NFT Required)
+5,6,LT01,Small Island
+5,7,LT21,Sea (No NFT Required)
+5,8,LT21,Sea (No NFT Required)
+5,9,LT10,Rocky Coastline
+5,10,LT10,Rocky Coastline
+5,11,LT14,River
+5,12,LT20,Grassland
+5,13,LT20,Grassland
+5,14,LT12,Grassy Coastline
+5,15,LT21,Sea (No NFT Required)
+5,16,LT21,Sea (No NFT Required)
+5,17,LT21,Sea (No NFT Required)
+5,18,LT21,Sea (No NFT Required)
+5,19,LT21,Sea (No NFT Required)
+5,20,LT10,Rocky Coastline
+5,21,LT10,Rocky Coastline
+5,22,LT21,Sea (No NFT Required)
+5,23,LT10,Rocky Coastline
+5,24,LT13,Mountains
+5,25,LT10,Rocky Coastline
+5,26,LT10,Rocky Coastline
+5,27,LT21,Sea (No NFT Required)
+5,28,LT10,Rocky Coastline
+5,29,LT15,Active Volcano
+5,30,LT02,Tree Forest
+5,31,LT21,Sea (No NFT Required)
+5,32,LT21,Sea (No NFT Required)
+5,33,LT21,Sea (No NFT Required)
+5,34,LT02,Tree Forest
+5,35,LT02,Tree Forest
+5,36,LT21,Sea (No NFT Required)
+5,37,LT21,Sea (No NFT Required)
+6,3,LT21,Sea (No NFT Required)
+6,4,LT21,Sea (No NFT Required)
+6,5,LT21,Sea (No NFT Required)
+6,6,LT21,Sea (No NFT Required)
+6,7,LT10,Rocky Coastline
+6,8,LT10,Rocky Coastline
+6,9,LT21,Sea (No NFT Required)
+6,10,LT21,Sea (No NFT Required)
+6,11,LT14,River
+6,12,LT12,Grassy Coastline
+6,13,LT21,Sea (No NFT Required)
+6,14,LT21,Sea (No NFT Required)
+6,15,LT21,Sea (No NFT Required)
+6,16,LT21,Sea (No NFT Required)
+6,17,LT21,Sea (No NFT Required)
+6,18,LT02,Tree Forest
+6,19,LT13,Mountains
+6,20,LT13,Mountains
+6,21,LT02,Tree Forest
+6,22,LT02,Tree Forest
+6,23,LT13,Mountains
+6,24,LT13,Mountains
+6,25,LT21,Sea (No NFT Required)
+6,26,LT21,Sea (No NFT Required)
+6,27,LT16,Dormant Volcano
+6,28,LT12,Grassy Coastline
+6,29,LT21,Sea (No NFT Required)
+6,30,LT12,Grassy Coastline
+6,31,LT20,Grassland
+6,32,LT19,Geothermal Springs
+6,33,LT19,Geothermal Springs
+6,34,LT12,Grassy Coastline
+6,35,LT21,Sea (No NFT Required)
+6,36,LT21,Sea (No NFT Required)
+6,37,LT01,Small Island
+6,38,LT21,Sea (No NFT Required)
+7,2,LT12,Grassy Coastline
+7,3,LT12,Grassy Coastline
+7,4,LT21,Sea (No NFT Required)
+7,5,LT21,Sea (No NFT Required)
+7,6,LT12,Grassy Coastline
+7,7,LT13,Mountains
+7,8,LT10,Rocky Coastline
+7,9,LT21,Sea (No NFT Required)
+7,10,LT21,Sea (No NFT Required)
+7,11,LT21,Sea (No NFT Required)
+7,12,LT21,Sea (No NFT Required)
+7,13,LT12,Grassy Coastline
+7,14,LT21,Sea (No NFT Required)
+7,15,LT21,Sea (No NFT Required)
+7,16,LT12,Grassy Coastline
+7,17,LT13,Mountains
+7,18,LT12,Grassy Coastline
+7,19,LT12,Grassy Coastline
+7,20,LT13,Mountains
+7,21,LT13,Mountains
+7,22,LT13,Mountains
+7,23,LT20,Grassland
+7,24,LT19,Geothermal Springs
+7,25,LT12,Grassy Coastline
+7,26,LT21,Sea (No NFT Required)
+7,27,LT21,Sea (No NFT Required)
+7,28,LT12,Grassy Coastline
+7,29,LT20,Grassland
+7,30,LT20,Grassland
+7,31,LT14,River
+7,32,LT14,River
+7,33,LT12,Grassy Coastline
+7,34,LT21,Sea (No NFT Required)
+7,35,LT21,Sea (No NFT Required)
+7,36,LT21,Sea (No NFT Required)
+7,37,LT21,Sea (No NFT Required)
+7,38,LT21,Sea (No NFT Required)
+7,39,LT21,Sea (No NFT Required)
+8,2,LT04,Plains
+8,3,LT11,Sandy Coastline
+8,4,LT21,Sea (No NFT Required)
+8,5,LT21,Sea (No NFT Required)
+8,6,LT11,Sandy Coastline
+8,7,LT15,Active Volcano
+8,8,LT13,Mountains
+8,9,LT21,Sea (No NFT Required)
+8,10,LT07,Rocky Desert
+8,11,LT07,Rocky Desert
+8,12,LT12,Grassy Coastline
+8,13,LT20,Grassland
+8,14,LT12,Grassy Coastline
+8,15,LT21,Sea (No NFT Required)
+8,16,LT12,Grassy Coastline
+8,17,LT12,Grassy Coastline
+8,18,LT21,Sea (No NFT Required)
+8,19,LT21,Sea (No NFT Required)
+8,20,LT12,Grassy Coastline
+8,21,LT12,Grassy Coastline
+8,22,LT21,Sea (No NFT Required)
+8,23,LT12,Grassy Coastline
+8,24,LT20,Grassland
+8,25,LT11,Sandy Coastline
+8,26,LT21,Sea (No NFT Required)
+8,27,LT21,Sea (No NFT Required)
+8,28,LT11,Sandy Coastline
+8,29,LT11,Sandy Coastline
+8,30,LT11,Sandy Coastline
+8,31,LT14,River
+8,32,LT12,Grassy Coastline
+8,33,LT21,Sea (No NFT Required)
+8,34,LT21,Sea (No NFT Required)
+8,35,LT21,Sea (No NFT Required)
+8,36,LT01,Small Island
+8,37,LT21,Sea (No NFT Required)
+8,38,LT21,Sea (No NFT Required)
+8,39,LT12,Grassy Coastline
+9,1,LT04,Plains
+9,2,LT04,Plains
+9,3,LT11,Sandy Coastline
+9,4,LT21,Sea (No NFT Required)
+9,5,LT21,Sea (No NFT Required)
+9,6,LT21,Sea (No NFT Required)
+9,7,LT11,Sandy Coastline
+9,8,LT12,Grassy Coastline
+9,9,LT21,Sea (No NFT Required)
+9,10,LT07,Rocky Desert
+9,11,LT07,Rocky Desert
+9,12,LT06,Sandy Dunes
+9,13,LT06,Sandy Dunes
+9,14,LT11,Sandy Coastline
+9,15,LT21,Sea (No NFT Required)
+9,16,LT21,Sea (No NFT Required)
+9,17,LT21,Sea (No NFT Required)
+9,18,LT21,Sea (No NFT Required)
+9,19,LT21,Sea (No NFT Required)
+9,20,LT11,Sandy Coastline
+9,21,LT20,Grassland
+9,22,LT11,Sandy Coastline
+9,23,LT21,Sea (No NFT Required)
+9,24,LT21,Sea (No NFT Required)
+9,25,LT21,Sea (No NFT Required)
+9,26,LT01,Small Island
+9,27,LT21,Sea (No NFT Required)
+9,28,LT01,Small Island
+9,29,LT21,Sea (No NFT Required)
+9,30,LT21,Sea (No NFT Required)
+9,31,LT21,Sea (No NFT Required)
+9,32,LT21,Sea (No NFT Required)
+9,33,LT21,Sea (No NFT Required)
+9,34,LT21,Sea (No NFT Required)
+9,35,LT21,Sea (No NFT Required)
+9,36,LT21,Sea (No NFT Required)
+9,37,LT21,Sea (No NFT Required)
+9,38,LT21,Sea (No NFT Required)
+9,39,LT12,Grassy Coastline
+9,40,LT04,Plains
+10,1,LT12,Grassy Coastline
+10,2,LT11,Sandy Coastline
+10,3,LT21,Sea (No NFT Required)
+10,4,LT21,Sea (No NFT Required)
+10,5,LT21,Sea (No NFT Required)
+10,6,LT21,Sea (No NFT Required)
+10,7,LT21,Sea (No NFT Required)
+10,8,LT21,Sea (No NFT Required)
+10,9,LT21,Sea (No NFT Required)
+10,10,LT21,Sea (No NFT Required)
+10,11,LT11,Sandy Coastline
+10,12,LT11,Sandy Coastline
+10,13,LT06,Sandy Dunes
+10,14,LT11,Sandy Coastline
+10,15,LT21,Sea (No NFT Required)
+10,16,LT01,Small Island
+10,17,LT21,Sea (No NFT Required)
+10,18,LT21,Sea (No NFT Required)
+10,19,LT21,Sea (No NFT Required)
+10,20,LT21,Sea (No NFT Required)
+10,21,LT11,Sandy Coastline
+10,22,LT21,Sea (No NFT Required)
+10,23,LT21,Sea (No NFT Required)
+10,24,LT21,Sea (No NFT Required)
+10,25,LT21,Sea (No NFT Required)
+10,26,LT01,Small Island
+10,27,LT21,Sea (No NFT Required)
+10,28,LT01,Small Island
+10,29,LT11,Sandy Coastline
+10,30,LT11,Sandy Coastline
+10,31,LT11,Sandy Coastline
+10,32,LT11,Sandy Coastline
+10,33,LT11,Sandy Coastline
+10,34,LT14,River
+10,35,LT21,Sea (No NFT Required)
+10,36,LT21,Sea (No NFT Required)
+10,37,LT21,Sea (No NFT Required)
+10,38,LT21,Sea (No NFT Required)
+10,39,LT11,Sandy Coastline
+10,40,LT12,Grassy Coastline
+11,1,LT21,Sea (No NFT Required)
+11,2,LT21,Sea (No NFT Required)
+11,3,LT21,Sea (No NFT Required)
+11,4,LT21,Sea (No NFT Required)
+11,5,LT11,Sandy Coastline
+11,6,LT11,Sandy Coastline
+11,7,LT11,Sandy Coastline
+11,8,LT21,Sea (No NFT Required)
+11,9,LT11,Sandy Coastline
+11,10,LT11,Sandy Coastline
+11,11,LT11,Sandy Coastline
+11,12,LT21,Sea (No NFT Required)
+11,13,LT21,Sea (No NFT Required)
+11,14,LT21,Sea (No NFT Required)
+11,15,LT01,Small Island
+11,16,LT21,Sea (No NFT Required)
+11,17,LT21,Sea (No NFT Required)
+11,18,LT21,Sea (No NFT Required)
+11,19,LT21,Sea (No NFT Required)
+11,20,LT21,Sea (No NFT Required)
+11,21,LT21,Sea (No NFT Required)
+11,22,LT21,Sea (No NFT Required)
+11,23,LT21,Sea (No NFT Required)
+11,24,LT21,Sea (No NFT Required)
+11,25,LT21,Sea (No NFT Required)
+11,26,LT21,Sea (No NFT Required)
+11,27,LT01,Small Island
+11,28,LT21,Sea (No NFT Required)
+11,29,LT11,Sandy Coastline
+11,30,LT20,Grassland
+11,31,LT02,Tree Forest
+11,32,LT02,Tree Forest
+11,33,LT14,River
+11,34,LT14,River
+11,35,LT11,Sandy Coastline
+11,36,LT21,Sea (No NFT Required)
+11,37,LT01,Small Island
+11,38,LT21,Sea (No NFT Required)
+11,39,LT21,Sea (No NFT Required)
+11,40,LT21,Sea (No NFT Required)
+12,1,LT21,Sea (No NFT Required)
+12,2,LT21,Sea (No NFT Required)
+12,3,LT01,Small Island
+12,4,LT21,Sea (No NFT Required)
+12,5,LT12,Grassy Coastline
+12,6,LT19,Geothermal Springs
+12,7,LT02,Tree Forest
+12,8,LT14,River
+12,9,LT20,Grassland
+12,10,LT02,Tree Forest
+12,11,LT03,Mushroom Forest
+12,12,LT11,Sandy Coastline
+12,13,LT21,Sea (No NFT Required)
+12,14,LT01,Small Island
+12,15,LT21,Sea (No NFT Required)
+12,16,LT21,Sea (No NFT Required)
+12,17,LT21,Sea (No NFT Required)
+12,18,LT01,Small Island
+12,19,LT21,Sea (No NFT Required)
+12,20,LT21,Sea (No NFT Required)
+12,21,LT01,Small Island
+12,22,LT21,Sea (No NFT Required)
+12,23,LT21,Sea (No NFT Required)
+12,24,LT21,Sea (No NFT Required)
+12,25,LT21,Sea (No NFT Required)
+12,26,LT01,Small Island
+12,27,LT12,Grassy Coastline
+12,28,LT04,Plains
+12,29,LT04,Plains
+12,30,LT02,Tree Forest
+12,31,LT02,Tree Forest
+12,32,LT02,Tree Forest
+12,33,LT14,River
+12,34,LT14,River
+12,35,LT12,Grassy Coastline
+12,36,LT21,Sea (No NFT Required)
+12,37,LT21,Sea (No NFT Required)
+12,38,LT01,Small Island
+12,39,LT21,Sea (No NFT Required)
+12,40,LT21,Sea (No NFT Required)
+13,2,LT21,Sea (No NFT Required)
+13,3,LT21,Sea (No NFT Required)
+13,4,LT21,Sea (No NFT Required)
+13,5,LT12,Grassy Coastline
+13,6,LT12,Grassy Coastline
+13,7,LT02,Tree Forest
+13,8,LT14,River
+13,9,LT12,Grassy Coastline
+13,10,LT03,Mushroom Forest
+13,11,LT14,River
+13,12,LT14,River
+13,13,LT12,Grassy Coastline
+13,14,LT21,Sea (No NFT Required)
+13,15,LT01,Small Island
+13,16,LT01,Small Island
+13,17,LT21,Sea (No NFT Required)
+13,18,LT21,Sea (No NFT Required)
+13,19,LT21,Sea (No NFT Required)
+13,20,LT21,Sea (No NFT Required)
+13,21,LT21,Sea (No NFT Required)
+13,22,LT11,Sandy Coastline
+13,23,LT21,Sea (No NFT Required)
+13,24,LT21,Sea (No NFT Required)
+13,25,LT01,Small Island
+13,26,LT21,Sea (No NFT Required)
+13,27,LT12,Grassy Coastline
+13,28,LT04,Plains
+13,29,LT04,Plains
+13,30,LT04,Plains
+13,31,LT02,Tree Forest
+13,32,LT13,Mountains
+13,33,LT16,Dormant Volcano
+13,34,LT14,River
+13,35,LT02,Tree Forest
+13,36,LT12,Grassy Coastline
+13,37,LT21,Sea (No NFT Required)
+13,38,LT21,Sea (No NFT Required)
+13,39,LT21,Sea (No NFT Required)
+14,2,LT21,Sea (No NFT Required)
+14,3,LT21,Sea (No NFT Required)
+14,4,LT21,Sea (No NFT Required)
+14,5,LT21,Sea (No NFT Required)
+14,6,LT21,Sea (No NFT Required)
+14,7,LT12,Grassy Coastline
+14,8,LT21,Sea (No NFT Required)
+14,9,LT21,Sea (No NFT Required)
+14,10,LT12,Grassy Coastline
+14,11,LT12,Grassy Coastline
+14,12,LT14,River
+14,13,LT14,River
+14,14,LT14,River
+14,15,LT21,Sea (No NFT Required)
+14,16,LT21,Sea (No NFT Required)
+14,17,LT21,Sea (No NFT Required)
+14,18,LT21,Sea (No NFT Required)
+14,19,LT21,Sea (No NFT Required)
+14,20,LT21,Sea (No NFT Required)
+14,21,LT21,Sea (No NFT Required)
+14,22,LT12,Grassy Coastline
+14,23,LT12,Grassy Coastline
+14,24,LT21,Sea (No NFT Required)
+14,25,LT21,Sea (No NFT Required)
+14,26,LT12,Grassy Coastline
+14,27,LT20,Grassland
+14,28,LT14,River
+14,29,LT14,River
+14,30,LT14,River
+14,31,LT14,River
+14,32,LT13,Mountains
+14,33,LT16,Dormant Volcano
+14,34,LT14,River
+14,35,LT02,Tree Forest
+14,36,LT12,Grassy Coastline
+14,37,LT21,Sea (No NFT Required)
+14,38,LT21,Sea (No NFT Required)
+14,39,LT21,Sea (No NFT Required)
+15,3,LT21,Sea (No NFT Required)
+15,4,LT21,Sea (No NFT Required)
+15,5,LT21,Sea (No NFT Required)
+15,6,LT21,Sea (No NFT Required)
+15,7,LT21,Sea (No NFT Required)
+15,8,LT21,Sea (No NFT Required)
+15,9,LT21,Sea (No NFT Required)
+15,10,LT21,Sea (No NFT Required)
+15,11,LT21,Sea (No NFT Required)
+15,12,LT12,Grassy Coastline
+15,13,LT12,Grassy Coastline
+15,14,LT21,Sea (No NFT Required)
+15,15,LT01,Small Island
+15,16,LT21,Sea (No NFT Required)
+15,17,LT21,Sea (No NFT Required)
+15,18,LT21,Sea (No NFT Required)
+15,19,LT21,Sea (No NFT Required)
+15,20,LT21,Sea (No NFT Required)
+15,21,LT21,Sea (No NFT Required)
+15,22,LT12,Grassy Coastline
+15,23,LT02,Tree Forest
+15,24,LT12,Grassy Coastline
+15,25,LT21,Sea (No NFT Required)
+15,26,LT21,Sea (No NFT Required)
+15,27,LT12,Grassy Coastline
+15,28,LT14,River
+15,29,LT20,Grassland
+15,30,LT02,Tree Forest
+15,31,LT02,Tree Forest
+15,32,LT02,Tree Forest
+15,33,LT14,River
+15,34,LT14,River
+15,35,LT02,Tree Forest
+15,36,LT21,Sea (No NFT Required)
+15,37,LT21,Sea (No NFT Required)
+15,38,LT21,Sea (No NFT Required)
+16,4,LT21,Sea (No NFT Required)
+16,5,LT21,Sea (No NFT Required)
+16,6,LT21,Sea (No NFT Required)
+16,7,LT21,Sea (No NFT Required)
+16,8,LT21,Sea (No NFT Required)
+16,9,LT21,Sea (No NFT Required)
+16,10,LT01,Small Island
+16,11,LT21,Sea (No NFT Required)
+16,12,LT10,Rocky Coastline
+16,13,LT12,Grassy Coastline
+16,14,LT21,Sea (No NFT Required)
+16,15,LT21,Sea (No NFT Required)
+16,16,LT21,Sea (No NFT Required)
+16,17,LT21,Sea (No NFT Required)
+16,18,LT21,Sea (No NFT Required)
+16,19,LT01,Small Island
+16,20,LT21,Sea (No NFT Required)
+16,21,LT21,Sea (No NFT Required)
+16,22,LT12,Grassy Coastline
+16,23,LT02,Tree Forest
+16,24,LT12,Grassy Coastline
+16,25,LT21,Sea (No NFT Required)
+16,26,LT21,Sea (No NFT Required)
+16,27,LT21,Sea (No NFT Required)
+16,28,LT21,Sea (No NFT Required)
+16,29,LT12,Grassy Coastline
+16,30,LT12,Grassy Coastline
+16,31,LT12,Grassy Coastline
+16,32,LT12,Grassy Coastline
+16,33,LT12,Grassy Coastline
+16,34,LT12,Grassy Coastline
+16,35,LT12,Grassy Coastline
+16,36,LT21,Sea (No NFT Required)
+16,37,LT21,Sea (No NFT Required)
+17,5,LT21,Sea (No NFT Required)
+17,6,LT21,Sea (No NFT Required)
+17,7,LT21,Sea (No NFT Required)
+17,8,LT21,Sea (No NFT Required)
+17,9,LT01,Small Island
+17,10,LT21,Sea (No NFT Required)
+17,11,LT21,Sea (No NFT Required)
+17,12,LT10,Rocky Coastline
+17,13,LT21,Sea (No NFT Required)
+17,14,LT21,Sea (No NFT Required)
+17,15,LT21,Sea (No NFT Required)
+17,16,LT21,Sea (No NFT Required)
+17,17,LT21,Sea (No NFT Required)
+17,18,LT01,Small Island
+17,19,LT21,Sea (No NFT Required)
+17,20,LT21,Sea (No NFT Required)
+17,21,LT08,Icy Desert
+17,22,LT07,Rocky Desert
+17,23,LT02,Tree Forest
+17,24,LT02,Tree Forest
+17,25,LT12,Grassy Coastline
+17,26,LT12,Grassy Coastline
+17,27,LT12,Grassy Coastline
+17,28,LT21,Sea (No NFT Required)
+17,29,LT21,Sea (No NFT Required)
+17,30,LT21,Sea (No NFT Required)
+17,31,LT21,Sea (No NFT Required)
+17,32,LT21,Sea (No NFT Required)
+17,33,LT21,Sea (No NFT Required)
+17,34,LT21,Sea (No NFT Required)
+17,35,LT21,Sea (No NFT Required)
+17,36,LT21,Sea (No NFT Required)
+18,6,LT21,Sea (No NFT Required)
+18,7,LT21,Sea (No NFT Required)
+18,8,LT21,Sea (No NFT Required)
+18,9,LT21,Sea (No NFT Required)
+18,10,LT21,Sea (No NFT Required)
+18,11,LT21,Sea (No NFT Required)
+18,12,LT10,Rocky Coastline
+18,13,LT21,Sea (No NFT Required)
+18,14,LT21,Sea (No NFT Required)
+18,15,LT21,Sea (No NFT Required)
+18,16,LT21,Sea (No NFT Required)
+18,17,LT21,Sea (No NFT Required)
+18,18,LT21,Sea (No NFT Required)
+18,19,LT21,Sea (No NFT Required)
+18,20,LT21,Sea (No NFT Required)
+18,21,LT08,Icy Desert
+18,22,LT09,Icy Mountains
+18,23,LT09,Icy Mountains
+18,24,LT02,Tree Forest
+18,25,LT02,Tree Forest
+18,26,LT02,Tree Forest
+18,27,LT02,Tree Forest
+18,28,LT10,Rocky Coastline
+18,29,LT21,Sea (No NFT Required)
+18,30,LT21,Sea (No NFT Required)
+18,31,LT21,Sea (No NFT Required)
+18,32,LT21,Sea (No NFT Required)
+18,33,LT21,Sea (No NFT Required)
+18,34,LT21,Sea (No NFT Required)
+18,35,LT21,Sea (No NFT Required)
+19,8,LT08,Icy Desert
+19,9,LT08,Icy Desert
+19,10,LT08,Icy Desert
+19,11,LT08,Icy Desert
+19,12,LT09,Icy Mountains
+19,13,LT08,Icy Desert
+19,14,LT08,Icy Desert
+19,15,LT21,Sea (No NFT Required)
+19,16,LT21,Sea (No NFT Required)
+19,17,LT21,Sea (No NFT Required)
+19,18,LT21,Sea (No NFT Required)
+19,19,LT21,Sea (No NFT Required)
+19,20,LT21,Sea (No NFT Required)
+19,21,LT08,Icy Desert
+19,22,LT08,Icy Desert
+19,23,LT09,Icy Mountains
+19,24,LT09,Icy Mountains
+19,25,LT08,Icy Desert
+19,26,LT08,Icy Desert
+19,27,LT08,Icy Desert
+19,28,LT08,Icy Desert
+19,29,LT08,Icy Desert
+19,30,LT08,Icy Desert
+19,31,LT08,Icy Desert
+19,32,LT08,Icy Desert
+19,33,LT08,Icy Desert
+20,14,LT08,Icy Desert
+20,15,LT08,Icy Desert
+20,16,LT08,Icy Desert
+20,17,LT08,Icy Desert
+20,18,LT08,Icy Desert
+20,19,LT08,Icy Desert
+20,20,LT08,Icy Desert
+20,21,LT08,Icy Desert
+20,22,LT08,Icy Desert
+20,23,LT08,Icy Desert
+20,24,LT08,Icy Desert
+20,25,LT08,Icy Desert
+20,26,LT08,Icy Desert
+20,27,LT08,Icy Desert
