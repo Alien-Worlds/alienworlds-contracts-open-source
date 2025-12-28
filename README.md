@@ -43,14 +43,14 @@ graph TD
     I[alien.worlds]:::interaction
 
     %% Connections and Processes
-    D -->|Calls claim (daily)| K
-    K -->|Distributes inflation (DTAP/DTAL/DTAS/DTAB)| H
+    D -->|Calls claim daily| K
+    K -->|Distributes inflation: DTAP, DTAL, DTAS, DTAB| H
     K -->|Transfers to planet reserve and fills mining| D
     D -->|Update auth on new period| E
     E --> F
     E --> G
 
-    C -->|Stake action - Trillium is sent to the federation| H
+    C -->|Stake action: Trillium is sent to the federation| H
     H -->|Contains DAC tokens only| H
     H -->|Federation Contract has permission to issue DAC tokens for each planet| I
     H -->|Planet DAC Tokens are issued to Player| J
