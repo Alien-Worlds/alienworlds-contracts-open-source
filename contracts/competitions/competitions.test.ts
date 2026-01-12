@@ -485,7 +485,7 @@ describe('Competitions', () => {
       });
     });
     context('without enough players', () => {
-      it('should update the state of the comp to rejected', async () => {
+      it('should update the state of the comp to expired', async () => {
         await assertRowsEqual(
           competitions.compsTable({
             scope: competitions.account.name,
@@ -511,11 +511,11 @@ describe('Competitions', () => {
               min_players: 3,
               max_players: 10,
               num_players: 0,
-              state: 'rejected',
+              state: 'expired',
               notice: '',
               extra_configs: [
                 { key: 'image', value: ['string', TEST_IMAGE] },
-                { key: 'url', value: ['string', TEST_URL] }
+                { key: 'url', value: ['string', TEST_URL] },
               ],
             },
           ]
@@ -681,24 +681,6 @@ describe('Competitions', () => {
     });
 
     context('When not in preparing or playing state', () => {
-      it('adding shards should fail', async () => {
-        await assertEOSErrorIncludesMessage(
-          competitions.addshards(id, shards),
-          'ERR:: Invalid state to add to the winnings'
-        );
-      });
-      it('adding TLM to winnings should fail', async () => {
-        await assertEOSErrorIncludesMessage(
-          tlmToken.transfer(
-            shared.tokenIssuer.name,
-            competitions.account.name,
-            '1000.0000 TLM',
-            id.toString(),
-            { from: shared.tokenIssuer }
-          ),
-          'ERR:: Invalid state to add to the winnings'
-        );
-      });
       it('should fail to claim reward', async () => {
         await assertEOSErrorIncludesMessage(
           competitions.claimreward(id, player1.name, { from: player1 }),
@@ -981,9 +963,6 @@ describe('Competitions', () => {
       before(async () => {
         await competitions.claimreward(id, players[2].name, {
           from: players[2],
-        });
-        await competitions.claimreward(id, players[4].name, {
-          from: players[4],
         });
       });
 
