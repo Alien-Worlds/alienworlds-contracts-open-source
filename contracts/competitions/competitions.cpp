@@ -7,7 +7,7 @@
 #include <atomicassets-interface.hpp>
 #include "../common/helpers.hpp"
 #include "../common/contracts-common/string_format.hpp"
-#include "../common/contracts-common/singleton.hpp" 
+#include "../common/contracts-common/singleton.hpp"
 
 static constexpr name COMP_STATE_PREPARING    = "preparing"_n;
 static constexpr name COMP_STATE_1_PLAYING    = "1.playing"_n;
@@ -109,8 +109,7 @@ CONTRACT competitions : public contract {
         PROPERTY(bool, allow_late_registration);
     };
 
-    using comps_table = eosio::multi_index<"comps"_n, comp_item,
-        indexed_by<"admin"_n, const_mem_fun<comp_item, uint64_t, &comp_item::by_admin>>,
+    using comps_table = eosio::multi_index<"comps"_n, comp_item, indexed_by<"admin"_n, const_mem_fun<comp_item, uint64_t, &comp_item::by_admin>>,
         indexed_by<"state"_n, const_mem_fun<comp_item, uint64_t, &comp_item::state_key>>,
         indexed_by<"winnings"_n, const_mem_fun<comp_item, uint64_t, &comp_item::winnings_key>>,
         indexed_by<"start"_n, const_mem_fun<comp_item, uint64_t, &comp_item::start_key>>,
@@ -151,8 +150,7 @@ CONTRACT competitions : public contract {
         }
     };
 
-    using players_table = eosio::multi_index<"players"_n, player_item,
-        indexed_by<"score"_n, const_mem_fun<player_item, uint64_t, &player_item::by_score>>,
+    using players_table = eosio::multi_index<"players"_n, player_item, indexed_by<"score"_n, const_mem_fun<player_item, uint64_t, &player_item::by_score>>,
         indexed_by<"reward"_n, const_mem_fun<player_item, uint64_t, &player_item::by_reward>>,
         indexed_by<"shards"_n, const_mem_fun<player_item, uint64_t, &player_item::by_shards>>,
         indexed_by<"claimed"_n, const_mem_fun<player_item, uint64_t, &player_item::by_claimed>>>;
@@ -184,14 +182,12 @@ CONTRACT competitions : public contract {
     }
 
 #ifdef IS_DEV
-    ACTION initcomp(eosio::name admin, string title, string description, uint16_t admin_pay_perc_x_100,
-        time_point_sec start, time_point_sec end, uint16_t min_players, uint16_t max_players,
-        bool allow_late_registration, time_point_sec current_time, string image, string url) {
+    ACTION initcomp(eosio::name admin, string title, string description, uint16_t admin_pay_perc_x_100, time_point_sec start, time_point_sec end,
+        uint16_t min_players, uint16_t max_players, bool allow_late_registration, time_point_sec current_time, string image, string url) {
 #else
 
-    ACTION initcomp(eosio::name admin, string title, string description, uint16_t admin_pay_perc_x_100,
-        time_point_sec start, time_point_sec end, uint16_t min_players, uint16_t max_players,
-        bool allow_late_registration, string image, string url) {
+    ACTION initcomp(eosio::name admin, string title, string description, uint16_t admin_pay_perc_x_100, time_point_sec start, time_point_sec end,
+        uint16_t min_players, uint16_t max_players, bool allow_late_registration, string image, string url) {
         const auto current_time = now();
 
 #endif
@@ -213,8 +209,8 @@ CONTRACT competitions : public contract {
 
         auto _globals             = globals{get_self(), get_self().value};
         auto min_prepare_duration = _globals.get_min_prepare_dur_seconds();
-        ::check(start > (current_time + min_prepare_duration),
-            "ERR::Start time must be in the future and after min prepare duration: %s", min_prepare_duration);
+        ::check(
+            start > (current_time + min_prepare_duration), "ERR::Start time must be in the future and after min prepare duration: %s", min_prepare_duration);
         check(end > start, "ERR::End time must be after start time.");
         _comps.emplace(get_self(), [&](comp_item &c) {
             c.id                            = next_id();
@@ -232,7 +228,7 @@ CONTRACT competitions : public contract {
                 c.set_allow_late_registration(allow_late_registration);
             }
             c.extra_configs["image"] = image;
-            c.extra_configs["url"] = url;
+            c.extra_configs["url"]   = url;
         });
     }
 
@@ -241,8 +237,7 @@ CONTRACT competitions : public contract {
         if (!has_auth(get_self())) {
             require_auth(comp->admin);
         }
-        check(comp->state == COMP_STATE_5_COMPLETE || comp->state == COMP_STATE_REJECTED ||
-                  comp->state == COMP_STATE_DELETING,
+        check(comp->state == COMP_STATE_5_COMPLETE || comp->state == COMP_STATE_REJECTED || comp->state == COMP_STATE_DELETING,
             "ERR::Cannot delete a competition that is not in the rejected or completed state.");
 
         auto players = players_table(get_self(), id);
@@ -320,12 +315,10 @@ CONTRACT competitions : public contract {
         require_auth(player);
         auto comp = _comps.require_find(id, "ERR::No competition with the provided ID.");
         if (comp->get_allow_late_registration()) {
-            check(comp->state == COMP_STATE_PREPARING || comp->state == COMP_STATE_1_PLAYING, 
-                "ERR::Not in the required state of `preparing` or `playing` to allow registering. state is: %s",
-                comp->state);
+            check(comp->state == COMP_STATE_PREPARING || comp->state == COMP_STATE_1_PLAYING,
+                "ERR::Not in the required state of `preparing` or `playing` to allow registering. state is: %s", comp->state);
         } else {
-            check(comp->state == COMP_STATE_PREPARING,
-                "ERR::Not in the required state of `preparing` to allow registering. state is: %s", comp->state);
+            check(comp->state == COMP_STATE_PREPARING, "ERR::Not in the required state of `preparing` to allow registering. state is: %s", comp->state);
             check(comp->start_time > current_time, "ERR::Competition has already started.");
         }
         check(comp->num_players < comp->max_players, "ERR:: The maximum number of players are already registered.");
@@ -348,7 +341,7 @@ CONTRACT competitions : public contract {
             if (current_time < comp.end_time) {
                 if (comp.num_players >= comp.min_players) {
                     return COMP_STATE_1_PLAYING;
-                } else if (comp.get_allow_late_registration()) { 
+                } else if (comp.get_allow_late_registration()) {
                     return comp.state;
                 } else {
                     return COMP_STATE_EXPIRED;
@@ -405,8 +398,7 @@ CONTRACT competitions : public contract {
         auto players = players_table(get_self(), id);
 
         for (const auto player_score : player_scores) {
-            auto player_itr =
-                players.require_find(player_score.first.value, fmt("player: %s not registered.", player_score.first));
+            auto player_itr = players.require_find(player_score.first.value, fmt("player: %s not registered.", player_score.first));
             players.modify(player_itr, same_payer, [&](player_item &p) {
                 p.live_score = player_score.second;
             });
@@ -436,8 +428,7 @@ CONTRACT competitions : public contract {
         auto players = players_table(get_self(), id);
 
         for (const auto player_score : player_scores) {
-            auto player_itr =
-                players.require_find(player_score.first.value, fmt("player: %s not registered.", player_score.first));
+            auto player_itr = players.require_find(player_score.first.value, fmt("player: %s not registered.", player_score.first));
             players.modify(player_itr, same_payer, [&](player_item &p) {
                 p.live_score += player_score.second;
             });
@@ -445,8 +436,7 @@ CONTRACT competitions : public contract {
     }
 
 #ifdef IS_DEV
-    ACTION declwinner(
-        uint64_t id, name player, uint16_t reward_perc_x_100, uint16_t shards_perc_x_100, time_point_sec current_time) {
+    ACTION declwinner(uint64_t id, name player, uint16_t reward_perc_x_100, uint16_t shards_perc_x_100, time_point_sec current_time) {
 #else
     ACTION declwinner(uint64_t id, name player, uint16_t reward_perc_x_100, uint16_t shards_perc_x_100) {
         const auto current_time = now();
@@ -454,8 +444,7 @@ CONTRACT competitions : public contract {
         auto comp = _comps.require_find(id, "ERR::No competition with the provided ID.");
         require_auth(comp->admin);
         // The first declwinner action will move the competition to the processing state.
-        check(comp->end_time < current_time && (comp->state == COMP_STATE_2_PROCESSING),
-            "ERR::Not in the required state of `processing`.");
+        check(comp->end_time < current_time && (comp->state == COMP_STATE_2_PROCESSING), "ERR::Not in the required state of `processing`.");
 
         auto players      = players_table(get_self(), id);
         auto found_player = players.require_find(player.value, "ERR::Player not registered for this competition.");
@@ -484,13 +473,11 @@ CONTRACT competitions : public contract {
         check(comp->state == COMP_STATE_2_PROCESSING, "ERR::Not in the required state of `processing`.");
         if (comp->winnings_budget.amount > 0) {
             auto winnings_delta = (100 * 100 - comp->winnings_allocated_perc_x_100) * 0.01;
-            ::check(comp->winnings_allocated_perc_x_100 == 100 * 100,
-                "ERR::Winnings have not been fully allocated. Missing: %s%%", winnings_delta);
+            ::check(comp->winnings_allocated_perc_x_100 == 100 * 100, "ERR::Winnings have not been fully allocated. Missing: %s%%", winnings_delta);
         }
         if (comp->shards_budget > 0) {
             auto shards_delta = (100 * 100 - comp->shards_allocated_perc_x_100) * 0.01;
-            ::check(comp->shards_allocated_perc_x_100 == 100 * 100,
-                "ERR::Shards have not been fully allocated. Missing: %s%%", shards_delta);
+            ::check(comp->shards_allocated_perc_x_100 == 100 * 100, "ERR::Shards have not been fully allocated. Missing: %s%%", shards_delta);
         }
         _comps.modify(comp, same_payer, [&](comp_item &c) {
             c.state = COMP_STATE_3_AUDITING;
@@ -507,9 +494,7 @@ CONTRACT competitions : public contract {
             c.state = COMP_STATE_4_REWARDING;
             c.winnings_claimed += pay_amount;
         });
-        action(permission_level{get_self(), "xfer"_n}, TOKEN_CONTRACT, "transfer"_n,
-            make_tuple(get_self(), comp->admin, pay_amount, memo))
-            .send();
+        action(permission_level{get_self(), "xfer"_n}, TOKEN_CONTRACT, "transfer"_n, make_tuple(get_self(), comp->admin, pay_amount, memo)).send();
     }
 
     ACTION dispute(uint64_t id, string notice) {
@@ -533,7 +518,7 @@ CONTRACT competitions : public contract {
         _comps.modify(comp, same_payer, [&](comp_item &c) {
             c.state  = COMP_STATE_REJECTED;
             c.notice = notice;
-        }); 
+        });
 
         const auto memo = std::string{fmt("rejected competition winnings from: %s.", comp->id)};
 
@@ -542,10 +527,9 @@ CONTRACT competitions : public contract {
             auto       sponsors = sponsors_table(get_self(), comp->id);
             auto       sponsor  = sponsors.begin();
             while (sponsor != sponsors.end()) {
-                action(permission_level{get_self(), "xfer"_n}, TOKEN_CONTRACT, "transfer"_n,
-                    make_tuple(get_self(), sponsor->sponsor, sponsor->reward, memo))
+                action(permission_level{get_self(), "xfer"_n}, TOKEN_CONTRACT, "transfer"_n, make_tuple(get_self(), sponsor->sponsor, sponsor->reward, memo))
                     .send();
-                sponsor = sponsors.erase(sponsor); 
+                sponsor = sponsors.erase(sponsor);
             }
         }
     }
@@ -560,34 +544,26 @@ CONTRACT competitions : public contract {
         auto found_player = players.require_find(player.value, "ERR::Player not registered for this competition.");
         check(comp->state == COMP_STATE_4_REWARDING, "ERR::Not in the required state of `rewarding`.");
         check(!found_player->claimed, "ERR::Player has already claimed their reward.");
-        check(found_player->reward_perc_x_100 > 0 || found_player->shards_perc_x_100 > 0,
-            "ERR::Player has no rewards to claim.");
+        check(found_player->reward_perc_x_100 > 0 || found_player->shards_perc_x_100 > 0, "ERR::Player has no rewards to claim.");
         auto reward_to_pay = comp->winnings_budget * found_player->reward_perc_x_100 / 100 / 100;
         if (reward_to_pay.amount > 0) {
             string memo = fmt("Reward for competition: %s", id);
 
             // ensure the reward pay doesn't over spend the winnings budget.
-            reward_to_pay.amount =
-                min(comp->winnings_budget.amount - comp->winnings_claimed.amount, reward_to_pay.amount);
+            reward_to_pay.amount = min(comp->winnings_budget.amount - comp->winnings_claimed.amount, reward_to_pay.amount);
 
-            action(permission_level{get_self(), "xfer"_n}, TOKEN_CONTRACT, "transfer"_n,
-                make_tuple(get_self(), player, reward_to_pay, memo))
-                .send();
+            action(permission_level{get_self(), "xfer"_n}, TOKEN_CONTRACT, "transfer"_n, make_tuple(get_self(), player, reward_to_pay, memo)).send();
         }
-        auto shards_to_add = S{comp->shards_budget} * S{found_player->shards_perc_x_100}.to<uint32_t>() /
-                             S<uint32_t>{100} / S<uint32_t>{100};
+        auto shards_to_add = S{comp->shards_budget} * S{found_player->shards_perc_x_100}.to<uint32_t>() / S<uint32_t>{100} / S<uint32_t>{100};
         if (shards_to_add > S<uint32_t>{0}) {
             shards_to_add = min(S{comp->shards_budget} - S{comp->shards_claimed}, shards_to_add);
 
 #ifdef IS_DEV
-            action(permission_level{USERPOINTS_ACCOUNT, "usrpoints"_n}, USERPOINTS_ACCOUNT, "addpoints"_n,
-                make_tuple(player, shards_to_add.value(), now()))
+            action(permission_level{USERPOINTS_ACCOUNT, "usrpoints"_n}, USERPOINTS_ACCOUNT, "addpoints"_n, make_tuple(player, shards_to_add.value(), now()))
                 .send();
 
 #else
-            action(permission_level{USERPOINTS_ACCOUNT, "usrpoints"_n}, USERPOINTS_ACCOUNT, "addpoints"_n,
-                make_tuple(player, shards_to_add.value()))
-                .send();
+            action(permission_level{USERPOINTS_ACCOUNT, "usrpoints"_n}, USERPOINTS_ACCOUNT, "addpoints"_n, make_tuple(player, shards_to_add.value())).send();
 #endif
         }
         players.modify(found_player, same_payer, [&](player_item &p) {
@@ -598,7 +574,9 @@ CONTRACT competitions : public contract {
             c.winnings_claimed += reward_to_pay;
             c.shards_claimed = S{c.shards_claimed} + shards_to_add;
 
-            if (c.winnings_claimed == c.winnings_budget) {
+            const bool winnings_done = (c.winnings_budget.amount == 0) || (c.winnings_claimed == c.winnings_budget);
+            const bool shards_done   = (c.shards_budget == 0) || (c.shards_claimed == c.shards_budget);
+            if (winnings_done && shards_done) {
                 c.state = COMP_STATE_5_COMPLETE;
             }
         });
@@ -610,9 +588,9 @@ CONTRACT competitions : public contract {
             require_auth(get_self());
         }
         check(notice.size() < 256, "ERR::notice must be less than 256 chars.");
-        check(comp->state != COMP_STATE_5_COMPLETE && comp->state !=     COMP_STATE_REJECTED,
+        check(comp->state != COMP_STATE_5_COMPLETE && comp->state != COMP_STATE_REJECTED,
             "ERR::POST_NOTICE_COMPLETED::Cannot post a notice for a complete competition.");
-        _comps.modify(comp, same_payer, [&](comp_item &c)  { 
+        _comps.modify(comp, same_payer, [&](comp_item &c) {
             c.notice = notice;
         });
     };
