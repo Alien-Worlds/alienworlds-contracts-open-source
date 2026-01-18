@@ -11,7 +11,20 @@ wax.sh
 landholders.csv
 scripts/landownerAmountsDue.json
 scripts/landowners.json
-/artifacts/
+# Build artifacts (ignored by default)
+/artifacts/*
+
+# Allow committing specific compiled contracts artifacts
+!/artifacts/compiled_contracts/
+/artifacts/compiled_contracts/*
+!/artifacts/compiled_contracts/contracts/
+/artifacts/compiled_contracts/contracts/*
+!/artifacts/compiled_contracts/contracts/atomicassets-contracts/
+/artifacts/compiled_contracts/contracts/atomicassets-contracts/*
+!/artifacts/compiled_contracts/contracts/atomicassets-contracts/src/
+/artifacts/compiled_contracts/contracts/atomicassets-contracts/src/*
+!/artifacts/compiled_contracts/contracts/atomicassets-contracts/src/atomicassets.abi
+!/artifacts/compiled_contracts/contracts/atomicassets-contracts/src/atomicassets.wasm
 /contracts/alwgladiator/alwgladiator.ts
 /contracts/tlm.token/tlm.token.ts
 /contracts/federation/federation.ts
