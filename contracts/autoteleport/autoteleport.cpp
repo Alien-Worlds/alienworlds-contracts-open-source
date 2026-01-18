@@ -136,7 +136,7 @@ CONTRACT autoteleport : public contract {
         auto balance_to_teleport = get_balance();
         check(balance_to_teleport > config.min_amount, "ERR: balance is less than min amount to teleport.");
 
-        if (balance_to_teleport > config.max_amount) {
+        if(balance_to_teleport > config.max_amount) {
             balance_to_teleport = config.max_amount;
         }
 
