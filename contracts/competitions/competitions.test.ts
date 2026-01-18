@@ -959,11 +959,21 @@ describe('Competitions', () => {
         'ERR::Player has no rewards to claim.'
       );
     });
-    context('After the remaining winners have claimed', () => {
+    context('After all winnings have been claimed but shards remain', () => {
       before(async () => {
         await competitions.claimreward(id, players[2].name, {
           from: players[2],
         });
+      });
+
+      it('should still be rewarding', async () => {
+        const competition = (await competitions.compsTable()).rows[0];
+        assert.equal(competition.state, COMP_STATE_4_REWARDING);
+      });
+    });
+
+    context('After the remaining shard winners have claimed', () => {
+      before(async () => {
         await competitions.claimreward(id, players[4].name, {
           from: players[4],
         });
