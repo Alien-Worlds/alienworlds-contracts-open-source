@@ -357,7 +357,7 @@ describe('Competitions', () => {
             notice: '',
             extra_configs: [
               { key: 'image', value: ['string', TEST_IMAGE] },
-              { key: 'url', value: ['string', TEST_URL] }
+              { key: 'url', value: ['string', TEST_URL] },
             ],
           },
         ]
@@ -964,6 +964,9 @@ describe('Competitions', () => {
         await competitions.claimreward(id, players[2].name, {
           from: players[2],
         });
+        await competitions.claimreward(id, players[4].name, {
+          from: players[4],
+        });
       });
 
       it('should complete the competition', async () => {
@@ -1369,7 +1372,7 @@ describe('Competitions', () => {
             extra_configs: [
               { key: 'allow_late_registration', value: [1, 'bool'] },
               { key: 'image', value: ['string', TEST_IMAGE] },
-              { key: 'url', value: ['string', TEST_URL] }
+              { key: 'url', value: ['string', TEST_URL] },
             ],
           },
         ]
