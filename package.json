@@ -8,7 +8,8 @@
     "build": "lamington build",
     "dev_build": "lamington build -DIS_DEV",
     "test_build": "lamington build -DIS_TEST_DEPLOY",
-    "format:cpp": "rg --files -g '*.cpp' -g '*.cc' -g '*.cxx' -g '*.hpp' -g '*.hh' -g '*.hxx' -g '!contracts/common/contracts-common/**' -g '!contracts/atomicassets-contracts/**' -g '!contracts/eosdac-contracts/**' | xargs clang-format -i",
+    "format:cpp": "bash scripts/clang_format_cpp.sh",
+    "format:cpp:check": "bash scripts/clang_format_cpp_check.sh",
     "stop": "lamington stop",
     "prepare": "husky"
   },
