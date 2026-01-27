@@ -575,7 +575,7 @@ CONTRACT competitions : public contract {
             c.shards_claimed = S{c.shards_claimed} + shards_to_add;
 
             const bool winnings_done = (c.winnings_budget.amount == 0) || (c.winnings_claimed == c.winnings_budget);
-            const bool shards_done   = (c.shards_budget == 0) || (c.shards_claimed == c.shards_budget);
+            const bool shards_done   = (c.shards_budget == 0) || ((c.shards_budget - c.shards_claimed) <= 1);
             if (winnings_done && shards_done) {
                 c.state = COMP_STATE_5_COMPLETE;
             }
