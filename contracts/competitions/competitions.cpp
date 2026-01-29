@@ -16,6 +16,7 @@ static constexpr name COMP_STATE_3_AUDITING   = "3.auditing"_n;
 static constexpr name COMP_STATE_4_REWARDING  = "4.rewarding"_n;
 static constexpr name COMP_STATE_5_COMPLETE   = "5.complete"_n;
 static constexpr name COMP_STATE_REJECTED     = "rejected"_n;
+static constexpr name COMP_STATE_EXPIRED      = "expired"_n;
 static constexpr name COMP_STATE_DELETING     = "deleting"_n;
 
 CONTRACT competitions : public contract {
@@ -262,7 +263,10 @@ CONTRACT competitions : public contract {
                 "ERR::INVALID_MEMO::Invalid memo for the winnings transfer. Please provide a valid competition ID.");
             auto comp_id = stoull(memo);
             auto comp    = _comps.require_find(comp_id, fmt("ERR::COMP_NOT_FOUND::No competition with the provided ID in the transfer memo: %s", comp_id));
-            if (comp->state == COMP_STATE_PREPARING) {
+            switch (comp->state.value) {
+            case COMP_STATE_PREPARING.value:
+            case COMP_STATE_1_PLAYING.value:
+            case COMP_STATE_2_PROCESSING.value: {
                 _comps.modify(comp, same_payer, [&](comp_item &c) {
                     c.winnings_budget += quantity;
                 });
@@ -279,7 +283,8 @@ CONTRACT competitions : public contract {
                         s.reward += quantity;
                     });
                 }
-            } else {
+            } break;
+            default:
                 check(false, "ERR:: Invalid state to add to the winnings");
             }
         }
@@ -290,6 +295,8 @@ CONTRACT competitions : public contract {
         auto comp = _comps.require_find(id, "ERR::No competition with the provided ID.");
         switch (comp->state.value) {
         case COMP_STATE_PREPARING.value:
+        case COMP_STATE_1_PLAYING.value:
+        case COMP_STATE_2_PROCESSING.value:
             _comps.modify(comp, same_payer, [&](comp_item &c) {
                 c.shards_budget += shards;
             });
@@ -334,8 +341,10 @@ CONTRACT competitions : public contract {
             if (current_time < comp.end_time) {
                 if (comp.num_players >= comp.min_players) {
                     return COMP_STATE_1_PLAYING;
+                } else if (comp.get_allow_late_registration()) {
+                    return comp.state;
                 } else {
-                    return COMP_STATE_REJECTED;
+                    return COMP_STATE_EXPIRED;
                 }
             } else {
                 return COMP_STATE_2_PROCESSING; // This should only happen if updatestate is not called between
@@ -492,6 +501,7 @@ CONTRACT competitions : public contract {
         require_auth(get_self());
         auto comp = _comps.require_find(id, "ERR::No competition with the provided ID.");
         check(comp->state == COMP_STATE_3_AUDITING, "ERR::Not in the required state of `auditing`.");
+        check(notice.size() < 256, "ERR::notice must be less than 256 chars.");
         _comps.modify(comp, same_payer, [&](comp_item &c) {
             c.state  = COMP_STATE_2_PROCESSING;
             c.notice = notice;
@@ -503,6 +513,7 @@ CONTRACT competitions : public contract {
         if (!has_auth(get_self())) {
             require_auth(comp->admin);
         }
+        check(notice.size() < 256, "ERR::notice must be less than 256 chars.");
         check(comp->state != COMP_STATE_5_COMPLETE, "ERR::Cannot reject a complete competition.");
         _comps.modify(comp, same_payer, [&](comp_item &c) {
             c.state  = COMP_STATE_REJECTED;
@@ -563,7 +574,9 @@ CONTRACT competitions : public contract {
             c.winnings_claimed += reward_to_pay;
             c.shards_claimed = S{c.shards_claimed} + shards_to_add;
 
-            if (c.winnings_claimed == c.winnings_budget && c.shards_claimed == c.shards_budget) {
+            const bool winnings_done = (c.winnings_budget.amount == 0) || (c.winnings_claimed == c.winnings_budget);
+            const bool shards_done   = (c.shards_budget == 0) || ((c.shards_budget - c.shards_claimed) <= 1);
+            if (winnings_done && shards_done) {
                 c.state = COMP_STATE_5_COMPLETE;
             }
         });
@@ -574,6 +587,7 @@ CONTRACT competitions : public contract {
         if (!has_auth(comp->admin)) {
             require_auth(get_self());
         }
+        check(notice.size() < 256, "ERR::notice must be less than 256 chars.");
         check(comp->state != COMP_STATE_5_COMPLETE && comp->state != COMP_STATE_REJECTED,
             "ERR::POST_NOTICE_COMPLETED::Cannot post a notice for a complete competition.");
         _comps.modify(comp, same_payer, [&](comp_item &c) {

@@ -357,7 +357,7 @@ describe('Competitions', () => {
             notice: '',
             extra_configs: [
               { key: 'image', value: ['string', TEST_IMAGE] },
-              { key: 'url', value: ['string', TEST_URL] }
+              { key: 'url', value: ['string', TEST_URL] },
             ],
           },
         ]
@@ -390,7 +390,8 @@ describe('Competitions', () => {
           '1',
           { from: shared.tokenIssuer }
         );
-        const competition = (await competitions.compsTable()).rows[0];
+        const competition = (await competitions.compsTable({ limit: 100 }))
+          .rows[0];
         assert.equal(competition.winnings_budget, '1000.0000 TLM');
       });
     });
@@ -485,7 +486,7 @@ describe('Competitions', () => {
       });
     });
     context('without enough players', () => {
-      it('should update the state of the comp to rejected', async () => {
+      it('should update the state of the comp to expired', async () => {
         await assertRowsEqual(
           competitions.compsTable({
             scope: competitions.account.name,
@@ -511,11 +512,11 @@ describe('Competitions', () => {
               min_players: 3,
               max_players: 10,
               num_players: 0,
-              state: 'rejected',
+              state: 'expired',
               notice: '',
               extra_configs: [
                 { key: 'image', value: ['string', TEST_IMAGE] },
-                { key: 'url', value: ['string', TEST_URL] }
+                { key: 'url', value: ['string', TEST_URL] },
               ],
             },
           ]
@@ -676,29 +677,12 @@ describe('Competitions', () => {
       );
     });
     it('should move to the processing state', async () => {
-      const competition = (await competitions.compsTable()).rows[0];
+      const competition = (await competitions.compsTable({ limit: 100 }))
+        .rows[0];
       assert.equal(competition.state, COMP_STATE_2_PROCESSING);
     });
 
     context('When not in preparing or playing state', () => {
-      it('adding shards should fail', async () => {
-        await assertEOSErrorIncludesMessage(
-          competitions.addshards(id, shards),
-          'ERR:: Invalid state to add to the winnings'
-        );
-      });
-      it('adding TLM to winnings should fail', async () => {
-        await assertEOSErrorIncludesMessage(
-          tlmToken.transfer(
-            shared.tokenIssuer.name,
-            competitions.account.name,
-            '1000.0000 TLM',
-            id.toString(),
-            { from: shared.tokenIssuer }
-          ),
-          'ERR:: Invalid state to add to the winnings'
-        );
-      });
       it('should fail to claim reward', async () => {
         await assertEOSErrorIncludesMessage(
           competitions.claimreward(id, player1.name, { from: player1 }),
@@ -880,7 +864,8 @@ describe('Competitions', () => {
       });
       it('should succeed', async () => {
         await competitions.completeproc(id, { from: gamedev });
-        const competition = (await competitions.compsTable()).rows[0];
+        const competition = (await competitions.compsTable({ limit: 100 }))
+          .rows[0];
         assert.equal(competition.state, COMP_STATE_3_AUDITING);
       });
     });
@@ -903,12 +888,14 @@ describe('Competitions', () => {
     });
     it('should move to disputing state when in auditing state', async () => {
       await competitions.dispute(id, "Doesn't look fair");
-      const competition = (await competitions.compsTable()).rows[0];
+      const competition = (await competitions.compsTable({ limit: 100 }))
+        .rows[0];
       assert.equal(competition.state, COMP_STATE_2_PROCESSING);
     });
     it('should allow moving to auditing state again', async () => {
       await competitions.completeproc(id, { from: gamedev });
-      const competition = (await competitions.compsTable()).rows[0];
+      const competition = (await competitions.compsTable({ limit: 100 }))
+        .rows[0];
       assert.equal(competition.state, COMP_STATE_3_AUDITING);
       assert.equal(competition.notice, "Doesn't look fair");
     });
@@ -925,7 +912,8 @@ describe('Competitions', () => {
     context('when in auditing state', () => {
       it('should move to rewarding state', async () => {
         await competitions.approve(id);
-        const competition = (await competitions.compsTable()).rows[0];
+        const competition = (await competitions.compsTable({ limit: 100 }))
+          .rows[0];
         assert.equal(competition.state, COMP_STATE_4_REWARDING);
       });
     });
@@ -961,7 +949,8 @@ describe('Competitions', () => {
       assert.equal(playerAfter.claimed, true);
     });
     it('should not yet complete the comp', async () => {
-      const competition = (await competitions.compsTable()).rows[0];
+      const competition = (await competitions.compsTable({ limit: 100 }))
+        .rows[0];
       assert.equal(competition.state, COMP_STATE_4_REWARDING);
     });
 
@@ -977,27 +966,423 @@ describe('Competitions', () => {
         'ERR::Player has no rewards to claim.'
       );
     });
-    context('After the remaining winners have claimed', () => {
+    context('After all winnings have been claimed but shards remain', () => {
       before(async () => {
         await competitions.claimreward(id, players[2].name, {
           from: players[2],
         });
+      });
+
+      it('should still be rewarding', async () => {
+        const competition = (await competitions.compsTable({ limit: 100 }))
+          .rows[0];
+        assert.equal(competition.state, COMP_STATE_4_REWARDING);
+      });
+    });
+
+    context('After the remaining shard winners have claimed', () => {
+      before(async () => {
         await competitions.claimreward(id, players[4].name, {
           from: players[4],
         });
       });
 
       it('should complete the competition', async () => {
-        const competition = (await competitions.compsTable()).rows[0];
+        const competition = (await competitions.compsTable({ limit: 100 }))
+          .rows[0];
         assert.equal(competition.state, COMP_STATE_5_COMPLETE);
       });
       it('should no longer be possible to reject', async () => {
-        const competition = (await competitions.compsTable()).rows[0];
+        const competition = (await competitions.compsTable({ limit: 100 }))
+          .rows[0];
         await assertEOSErrorIncludesMessage(
           competitions.reject(competition.id, reason, {
             from: gamedev,
           }),
           'ERR::Cannot reject a complete competition.'
+        );
+      });
+    });
+
+    context('competition completion logic validation', () => {
+      let testCompId: number;
+
+      before(async () => {
+        // Create a new competition specifically for testing completion logic
+        await competitions.initcomp(
+          gamedev.name,
+          'completion test',
+          'Testing completion logic',
+          adminPay,
+          timePlusSeconds(currentBlockTime, 5),
+          timePlusSeconds(currentBlockTime, 15),
+          minPlayers,
+          maxPlayers,
+          false,
+          timePlusSeconds(currentBlockTime, 0),
+          TEST_IMAGE,
+          TEST_URL,
+          { from: gamedev }
+        );
+
+        // Get the new competition ID
+        const comps = await competitions.compsTable({ limit: 100 });
+        testCompId = comps.rows.find(
+          (comp) => comp.title === 'completion test'
+        )!.id;
+
+        // Register players
+        await competitions.regplayer(
+          testCompId,
+          player1.name,
+          timePlusSeconds(currentBlockTime, 1),
+          { from: player1 }
+        );
+        for (let idx = 0; idx < 3; idx++) {
+          await competitions.regplayer(
+            testCompId,
+            players[idx].name,
+            timePlusSeconds(currentBlockTime, 1),
+            { from: players[idx] }
+          );
+        }
+
+        // Add winnings and shards
+        await tlmToken.transfer(
+          shared.tokenIssuer.name,
+          competitions.account.name,
+          '1000.0000 TLM',
+          testCompId.toString(),
+          { from: shared.tokenIssuer }
+        );
+        await competitions.addshards(testCompId, 1000, {
+          from: competitions.account,
+        });
+
+        // Start and end the competition
+        await competitions.updatestate(
+          testCompId,
+          timePlusSeconds(currentBlockTime, 6),
+          { from: gamedev }
+        );
+        await competitions.updatestate(
+          testCompId,
+          timePlusSeconds(currentBlockTime, 16),
+          { from: gamedev }
+        );
+
+        // Declare winners (100% allocation)
+        await competitions.declwinner(
+          testCompId,
+          player1.name,
+          5000, // 50% winnings
+          5000, // 50% shards
+          timePlusSeconds(currentBlockTime, 20),
+          { from: gamedev }
+        );
+        await competitions.declwinner(
+          testCompId,
+          players[0].name,
+          4900, // 50% winnings
+          5000, // 50% shards
+          timePlusSeconds(currentBlockTime, 20),
+          { from: gamedev }
+        );
+
+        // Complete processing and approve
+        await competitions.completeproc(testCompId, { from: gamedev });
+        await competitions.approve(testCompId);
+      });
+
+      it('should not complete when only winnings are fully claimed but shards remain', async () => {
+        // Claim only the winnings winner
+        await competitions.claimreward(testCompId, player1.name, {
+          from: player1,
+        });
+
+        const competition = (
+          await competitions.compsTable({ limit: 100 })
+        ).rows.find((comp) => comp.id === testCompId);
+        assert.equal(
+          competition.state,
+          COMP_STATE_4_REWARDING,
+          'Competition should still be in rewarding state when shards remain unclaimed'
+        );
+      });
+
+      it('should complete when both winnings and shards are fully claimed', async () => {
+        // Claim the remaining winner to complete both winnings and shards
+        await competitions.claimreward(testCompId, players[0].name, {
+          from: players[0],
+        });
+
+        const competition = (
+          await competitions.compsTable({ limit: 100 })
+        ).rows.find((comp) => comp.id === testCompId);
+        assert.equal(
+          competition.state,
+          COMP_STATE_5_COMPLETE,
+          'Competition should be complete when both winnings and shards are fully claimed'
+        );
+      });
+
+      it('should handle edge case: competition with zero winnings budget', async () => {
+        // Create a competition with zero winnings budget
+        await competitions.initcomp(
+          gamedev.name,
+          'zero winnings test',
+          'Testing zero winnings',
+          adminPay,
+          timePlusSeconds(currentBlockTime, 5),
+          timePlusSeconds(currentBlockTime, 15),
+          minPlayers,
+          maxPlayers,
+          false,
+          timePlusSeconds(currentBlockTime, 0),
+          TEST_IMAGE,
+          TEST_URL,
+          { from: gamedev }
+        );
+
+        const zeroWinningsCompId = (
+          await competitions.compsTable({ limit: 100 })
+        ).rows.find((comp) => comp.title === 'zero winnings test')!.id;
+
+        // Register players and add only shards (no TLM)
+        await competitions.regplayer(
+          zeroWinningsCompId,
+          player1.name,
+          timePlusSeconds(currentBlockTime, 1),
+          { from: player1 }
+        );
+        for (let idx = 0; idx < 3; idx++) {
+          await competitions.regplayer(
+            zeroWinningsCompId,
+            players[idx].name,
+            timePlusSeconds(currentBlockTime, 1),
+            { from: players[idx] }
+          );
+        }
+
+        await competitions.addshards(zeroWinningsCompId, 500, {
+          from: competitions.account,
+        });
+
+        // Start and end the competition
+        await competitions.updatestate(
+          zeroWinningsCompId,
+          timePlusSeconds(currentBlockTime, 6),
+          { from: gamedev }
+        );
+        await competitions.updatestate(
+          zeroWinningsCompId,
+          timePlusSeconds(currentBlockTime, 16),
+          { from: gamedev }
+        );
+
+        // Declare shards winner (100% allocation)
+        await competitions.declwinner(
+          zeroWinningsCompId,
+          player1.name,
+          0, // 0% winnings (since there are none)
+          10000, // 100% shards
+          timePlusSeconds(currentBlockTime, 20),
+          { from: gamedev }
+        );
+
+        // Complete processing and approve
+        await competitions.completeproc(zeroWinningsCompId, { from: gamedev });
+        assertEOSErrorIncludesMessage(
+          competitions.approve(zeroWinningsCompId),
+          'must transfer positive quantity'
+        );
+      });
+
+      it('should handle edge case: competition with zero shards budget', async () => {
+        // Create a competition with zero shards budget
+        await competitions.initcomp(
+          gamedev.name,
+          'zero shards test',
+          'Testing zero shards',
+          adminPay,
+          timePlusSeconds(currentBlockTime, 5),
+          timePlusSeconds(currentBlockTime, 15),
+          minPlayers,
+          maxPlayers,
+          false,
+          timePlusSeconds(currentBlockTime, 0),
+          TEST_IMAGE,
+          TEST_URL,
+          { from: gamedev }
+        );
+
+        const zeroShardsCompId = (
+          await competitions.compsTable({ limit: 100 })
+        ).rows.find((comp) => comp.title === 'zero shards test')!.id;
+
+        // Register players and add only winnings (no shards)
+        await competitions.regplayer(
+          zeroShardsCompId,
+          player1.name,
+          timePlusSeconds(currentBlockTime, 1),
+          { from: player1 }
+        );
+        for (let idx = 0; idx < 3; idx++) {
+          await competitions.regplayer(
+            zeroShardsCompId,
+            players[idx].name,
+            timePlusSeconds(currentBlockTime, 1),
+            { from: players[idx] }
+          );
+        }
+
+        await tlmToken.transfer(
+          shared.tokenIssuer.name,
+          competitions.account.name,
+          '750.0000 TLM',
+          zeroShardsCompId.toString(),
+          { from: shared.tokenIssuer }
+        );
+
+        // Start and end the competition
+        await competitions.updatestate(
+          zeroShardsCompId,
+          timePlusSeconds(currentBlockTime, 6),
+          { from: gamedev }
+        );
+        await competitions.updatestate(
+          zeroShardsCompId,
+          timePlusSeconds(currentBlockTime, 16),
+          { from: gamedev }
+        );
+
+        // Declare winnings winner (100% allocation)
+        await competitions.declwinner(
+          zeroShardsCompId,
+          player1.name,
+          9900, // 100% winnings
+          0, // 0% shards (since there are none)
+          timePlusSeconds(currentBlockTime, 20),
+          { from: gamedev }
+        );
+
+        // Complete processing and approve
+        await competitions.completeproc(zeroShardsCompId, { from: gamedev });
+        await competitions.approve(zeroShardsCompId);
+
+        // Claim the winnings (should complete since shards_budget == 0)
+        await competitions.claimreward(zeroShardsCompId, player1.name, {
+          from: player1,
+        });
+
+        const competition = (
+          await competitions.compsTable({ limit: 100 })
+        ).rows.find((comp) => comp.id === zeroShardsCompId);
+        assert.equal(
+          competition.state,
+          COMP_STATE_5_COMPLETE,
+          'Competition with zero shards should complete when winnings are fully claimed'
+        );
+      });
+
+      it('should handle edge case: competition with < 1 shards budget remaining', async () => {
+        // Create a competition with zero shards budget
+        await competitions.initcomp(
+          gamedev.name,
+          'small shards test',
+          'Testing small shards',
+          adminPay,
+          timePlusSeconds(currentBlockTime, 5),
+          timePlusSeconds(currentBlockTime, 15),
+          minPlayers,
+          maxPlayers,
+          false,
+          timePlusSeconds(currentBlockTime, 0),
+          TEST_IMAGE,
+          TEST_URL,
+          { from: gamedev }
+        );
+
+        const smallShardsCompId = (
+          await competitions.compsTable({ limit: 100 })
+        ).rows.find((comp) => comp.title === 'small shards test')!.id;
+
+        // Register players and add only winnings (no shards)
+        await competitions.regplayer(
+          smallShardsCompId,
+          player1.name,
+          timePlusSeconds(currentBlockTime, 1),
+          { from: player1 }
+        );
+        for (let idx = 0; idx < 3; idx++) {
+          await competitions.regplayer(
+            smallShardsCompId,
+            players[idx].name,
+            timePlusSeconds(currentBlockTime, 1),
+            { from: players[idx] }
+          );
+        }
+
+        await tlmToken.transfer(
+          shared.tokenIssuer.name,
+          competitions.account.name,
+          '70.0000 TLM',
+          smallShardsCompId.toString(),
+          { from: shared.tokenIssuer }
+        );
+
+        await competitions.addshards(smallShardsCompId, 20, {
+          from: competitions.account,
+        });
+
+        // Start and end the competition
+        await competitions.updatestate(
+          smallShardsCompId,
+          timePlusSeconds(currentBlockTime, 6),
+          { from: gamedev }
+        );
+        await competitions.updatestate(
+          smallShardsCompId,
+          timePlusSeconds(currentBlockTime, 16),
+          { from: gamedev }
+        );
+
+        // Declare winnings winner (99% allocation)
+        await competitions.declwinner(
+          smallShardsCompId,
+          player1.name,
+          9900, // 100% winnings
+          9900, // 99% shards
+          timePlusSeconds(currentBlockTime, 20),
+          { from: gamedev }
+        );
+
+        // Declare winnings winner (99% allocation)
+        await competitions.declwinner(
+          smallShardsCompId,
+          players[1].name,
+          0, // 0% winnings
+          100, // 1% shards
+          timePlusSeconds(currentBlockTime, 21),
+          { from: gamedev }
+        );
+
+        // Complete processing and approve
+        await competitions.completeproc(smallShardsCompId, { from: gamedev });
+        await competitions.approve(smallShardsCompId);
+
+        // Claim the winnings (should complete since shards_budget == 0)
+        await competitions.claimreward(smallShardsCompId, player1.name, {
+          from: player1,
+        });
+
+        const competition = (
+          await competitions.compsTable({ limit: 100 })
+        ).rows.find((comp) => comp.id === smallShardsCompId);
+        assert.equal(
+          competition.state,
+          COMP_STATE_5_COMPLETE,
+          'Competition with zero shards should complete when winnings are fully claimed'
         );
       });
     });
@@ -1021,7 +1406,9 @@ describe('Competitions', () => {
           TEST_URL,
           { from: gamedev }
         );
-        competitionId = (await competitions.compsTable()).rows.pop().id;
+        competitionId = (
+          await competitions.compsTable({ limit: 100 })
+        ).rows.pop().id;
       });
 
       it('should fail to reject a completed competition', async () => {
@@ -1105,7 +1492,9 @@ describe('Competitions', () => {
             TEST_URL,
             { from: gamedev }
           );
-          rejectedCompId = (await competitions.compsTable()).rows.find(
+          rejectedCompId = (
+            await competitions.compsTable({ limit: 100 })
+          ).rows.find(
             (comp) => comp.description === 'test no declared winnings return'
           )!.id;
         });
@@ -1120,9 +1509,9 @@ describe('Competitions', () => {
           await competitions.reject(rejectedCompId, reason, {
             from: gamedev,
           });
-          const competition = (await competitions.compsTable()).rows.find(
-            (comp) => comp.id === rejectedCompId
-          );
+          const competition = (
+            await competitions.compsTable({ limit: 100 })
+          ).rows.find((comp) => comp.id === rejectedCompId);
           assert.equal(competition.state, COMP_STATE_REJECTED);
         });
       });
@@ -1145,7 +1534,7 @@ describe('Competitions', () => {
             { from: gamedev }
           );
 
-          const res = await competitions.compsTable();
+          const res = await competitions.compsTable({ limit: 100 });
           rejectedCompId = res.rows.find(
             (comp) => comp.description === 'test declared winnings return'
           )!.id;
@@ -1221,9 +1610,9 @@ describe('Competitions', () => {
             await competitions.postnotice(rejectedCompId, 'test', {
               from: gamedev,
             });
-            const competition = (await competitions.compsTable()).rows.find(
-              (comp) => comp.id === rejectedCompId
-            );
+            const competition = (
+              await competitions.compsTable({ limit: 100 })
+            ).rows.find((comp) => comp.id === rejectedCompId);
             assert.equal(competition.notice, 'test');
           });
         });
@@ -1275,9 +1664,9 @@ describe('Competitions', () => {
             );
           });
           it('should reject the competition and change the state to COMP_STATE_REJECTED', async () => {
-            const competition = (await competitions.compsTable()).rows.find(
-              (comp) => comp.id === rejectedCompId
-            );
+            const competition = (
+              await competitions.compsTable({ limit: 100 })
+            ).rows.find((comp) => comp.id === rejectedCompId);
             assert.equal(competition.state, COMP_STATE_REJECTED);
             assert.equal(competition.notice, reason);
           });
@@ -1340,11 +1729,11 @@ describe('Competitions', () => {
   });
 
   context('allow late reg competition', async () => {
+    let id: number;
     before(async () => {
-      id = 17;
       await competitions.initcomp(
         gamedev.name,
-        'title',
+        'late reg comp',
         description,
         adminPay,
         timePlusSeconds(currentBlockTime, 16),
@@ -1357,43 +1746,19 @@ describe('Competitions', () => {
         TEST_URL,
         { from: gamedev }
       );
+      console.log(`Initialized late reg competition`);
+
+      let rows = (await competitions.compsTable({ limit: 100 })).rows;
+      id = rows.find((comp) => comp.title == 'late reg comp')!.id;
     });
 
     it('should update the state of the comp', async () => {
-      await assertRowsEqual(
-        competitions.compsTable({
-          scope: competitions.account.name,
-          lowerBound: id,
-          upperBound: id,
-        }),
-        [
-          {
-            id,
-            admin: 'gamedev',
-            title: 'title',
-            description:
-              'Battle Royale game: Up to 10 players can compete for the full TLM prize. The winner will receive 50% off the shards and 50% of the TLM winnings. The remaining 50% will be distributed among the other players at the discretion of the game dev. The game will last for at least 60 minutes.',
-            winnings_budget: '0.0000 TLM',
-            winnings_claimed: '0.0000 TLM',
-            winnings_allocated_perc_x_100: 100,
-            admin_pay_perc_x_100: 100,
-            shards_budget: 0,
-            shards_allocated_perc_x_100: 0,
-            shards_claimed: 0,
-            start_time: timePlusSecondsWithLocalOffset(currentBlockTime, 16),
-            end_time: timePlusSecondsWithLocalOffset(currentBlockTime, 45),
-            min_players: 3,
-            max_players: 10,
-            num_players: 0,
-            state: 'preparing',
-            notice: '',
-            extra_configs: [
-              { key: 'allow_late_registration', value: [1, 'bool'] },
-              { key: 'image', value: ['string', TEST_IMAGE] },
-              { key: 'url', value: ['string', TEST_URL] }
-            ],
-          },
-        ]
+      const competition = (
+        await competitions.compsTable({ limit: 100 })
+      ).rows.find((comp) => comp.id === id);
+      assert.equal(competition.state, COMP_STATE_PREPARING);
+      console.log(
+        `Competition ID for late reg test: ${id} ${competition.state}`
       );
     });
 

@@ -8,7 +8,8 @@
     "build": "lamington build",
     "dev_build": "lamington build -DIS_DEV",
     "test_build": "lamington build -DIS_TEST_DEPLOY",
-    "format:cpp": "rg --files -g '*.cpp' -g '*.cc' -g '*.cxx' -g '*.hpp' -g '*.hh' -g '*.hxx' -g '!contracts/common/contracts-common/**' -g '!contracts/atomicassets-contracts/**' -g '!contracts/eosdac-contracts/**' | xargs clang-format -i",
+    "format:cpp": "bash scripts/clang_format_cpp.sh",
+    "format:cpp:check": "bash scripts/clang_format_cpp_check.sh",
     "stop": "lamington stop",
     "prepare": "husky"
   },
@@ -33,7 +34,7 @@
     "atomicassets": "https://github.com/Alien-Worlds/atomicassets-js",
     "axon": "^2.0.3",
     "call-bind": "^1.0.2",
-    "clang-format": "^1.7.0",
+    "clang-format": "1.7.0",
     "dayjs": "^1.11.1",
     "int64-buffer": "^1.0.0",
     "lamington": "https://github.com/Alien-Worlds/lamington.git",
@@ -47,5 +48,6 @@
     "**/*.{ts,tsx,js,jsx,json,md,yml,yaml}": [
       "prettier --write"
     ]
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
