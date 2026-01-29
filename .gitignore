@@ -58,3 +58,4 @@ contracts/autoteleport/autoteleport.ts
 lib
 contracts/infl/infl.ts
 /contracts/alienworlds-contracts-private
+alienworlds-contracts-private/

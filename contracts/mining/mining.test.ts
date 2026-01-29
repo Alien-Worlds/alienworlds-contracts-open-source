@@ -1737,7 +1737,7 @@ describe('Mining', () => {
     context('with invalid params', async () => {
       it('should fail with invalid claim rate', async () => {
         await assertEOSErrorIncludesMessage(
-          mining.pltdtapset('eyeke.world', 2600, 'reclminerwds', {
+          mining.pltdtapset('eyeke.world', 3600, 'reclminerwds', {
             from: authorizer,
           }),
           'ERR::INVALID_CLAIM_RATE'
