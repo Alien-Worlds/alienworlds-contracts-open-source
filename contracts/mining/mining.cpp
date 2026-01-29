@@ -297,7 +297,7 @@ void mining::setpoolrates(const std::map<string, double> &rates, const name plan
 }
 
 void mining::pltdtapset(name planet_name, uint32_t claim_rate_perc_x100, name destination) {
-    check(claim_rate_perc_x100 >= 0 && claim_rate_perc_x100 <= 2500, "ERR::INVALID_CLAIM_RATE::Claim rate must be between 0 and 25%");
+    check(claim_rate_perc_x100 >= 0 && claim_rate_perc_x100 <= 3500, "ERR::INVALID_CLAIM_RATE::Claim rate must be between 0 and 35%");
     require_auth(planet_auth(planet_name));
 
     check(is_account(destination), "ERR::INVALID_DESTINATION::Destination must be a valid account");
