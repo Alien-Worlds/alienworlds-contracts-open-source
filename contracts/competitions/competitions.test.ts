@@ -522,6 +522,16 @@ describe('Competitions', () => {
           ]
         );
       });
+      it('should allow deleting an expired competition', async () => {
+        await competitions.deletecomp(2, 6, { from: gamedev });
+        await assertRowCount(
+          competitions.compsTable({
+            lowerBound: 2,
+            upperBound: 2,
+          }),
+          0
+        );
+      });
     });
   });
 
@@ -1784,6 +1794,111 @@ describe('Competitions', () => {
           from: players[8],
         }
       );
+    });
+  });
+
+  context('auto-complete via updatestate', async () => {
+    let testCompId: number;
+    before(async () => {
+      // Create a competition
+      await competitions.initcomp(
+        gamedev.name,
+        'auto-complete test',
+        'Testing auto-complete',
+        adminPay,
+        timePlusSeconds(currentBlockTime, 5),
+        timePlusSeconds(currentBlockTime, 15),
+        minPlayers,
+        maxPlayers,
+        false,
+        timePlusSeconds(currentBlockTime, 0),
+        TEST_IMAGE,
+        TEST_URL,
+        { from: gamedev }
+      );
+      const res = await competitions.compsTable({ limit: 100 });
+      testCompId = res.rows.find(
+        (comp) => comp.title === 'auto-complete test'
+      )!.id;
+
+      // Register players
+      await competitions.regplayer(
+        testCompId,
+        player1.name,
+        timePlusSeconds(currentBlockTime, 1),
+        { from: player1 }
+      );
+      for (let idx = 0; idx < 3; idx++) {
+        await competitions.regplayer(
+          testCompId,
+          players[idx].name,
+          timePlusSeconds(currentBlockTime, 1),
+          { from: players[idx] }
+        );
+      }
+
+      // Add winnings (no shards for simplicity to trigger the new line)
+      await tlmToken.transfer(
+        shared.tokenIssuer.name,
+        competitions.account.name,
+        '100.0000 TLM',
+        testCompId.toString(),
+        { from: shared.tokenIssuer }
+      );
+
+      // Start and end the competition
+      await competitions.updatestate(
+        testCompId,
+        timePlusSeconds(currentBlockTime, 6),
+        { from: gamedev }
+      );
+      await competitions.updatestate(
+        testCompId,
+        timePlusSeconds(currentBlockTime, 16),
+        { from: gamedev }
+      );
+
+      // Declare winners (100% allocation)
+      await competitions.declwinner(
+        testCompId,
+        player1.name,
+        9900, // 99% + 1% admin pay = 100%
+        0,
+        timePlusSeconds(currentBlockTime, 20),
+        { from: gamedev }
+      );
+
+      // Complete processing and approve
+      await competitions.completeproc(testCompId, { from: gamedev });
+      await competitions.approve(testCompId);
+    });
+
+    it('should transition to complete if all winnings were claimed and updatestate is called', async () => {
+      // Initially in rewarding state
+      let competition = (
+        await competitions.compsTable({ limit: 100 })
+      ).rows.find((comp) => comp.id === testCompId);
+      assert.equal(competition.state, COMP_STATE_4_REWARDING);
+
+      // Claim rewards
+      await competitions.claimreward(testCompId, player1.name, {
+        from: player1,
+      });
+
+      // In the new logic, updatestate should also be able to move it to complete
+      // (though claimreward might have already done it, this verifies get_state also works)
+      await competitions.updatestate(
+        testCompId,
+        timePlusSeconds(currentBlockTime, 25),
+        {
+          from: gamedev,
+        }
+      );
+
+      competition = (await competitions.compsTable({ limit: 100 })).rows.find(
+        (comp) => comp.id === testCompId
+      );
+      assert.equal(competition.state, COMP_STATE_5_COMPLETE);
     });
   });
 

@@ -237,7 +237,8 @@ CONTRACT competitions : public contract {
         if (!has_auth(get_self())) {
             require_auth(comp->admin);
         }
-        check(comp->state == COMP_STATE_5_COMPLETE || comp->state == COMP_STATE_REJECTED || comp->state == COMP_STATE_DELETING,
+        check(comp->state == COMP_STATE_5_COMPLETE || comp->state == COMP_STATE_REJECTED || comp->state == COMP_STATE_DELETING ||
+                  comp->state == COMP_STATE_EXPIRED,
             "ERR::Cannot delete a competition that is not in the rejected or completed state.");
 
         auto players = players_table(get_self(), id);
@@ -350,6 +351,9 @@ CONTRACT competitions : public contract {
                 return COMP_STATE_2_PROCESSING; // This should only happen if updatestate is not called between
                                                 // start_time and end_time.
             }
+        }
+        if (comp.state == COMP_STATE_4_REWARDING && comp.winnings_claimed == comp.winnings_budget) {
+            return COMP_STATE_5_COMPLETE;
         }
         // check the end time has passed and the competition is in the playing state.
         if (comp.state == COMP_STATE_1_PLAYING && current_time >= comp.end_time) {
