@@ -267,7 +267,8 @@ CONTRACT competitions : public contract {
             switch (comp->state.value) {
             case COMP_STATE_PREPARING.value:
             case COMP_STATE_1_PLAYING.value:
-            case COMP_STATE_2_PROCESSING.value: {
+            case COMP_STATE_2_PROCESSING.value:
+            case COMP_STATE_3_AUDITING.value: {
                 _comps.modify(comp, same_payer, [&](comp_item &c) {
                     c.winnings_budget += quantity;
                 });
@@ -298,6 +299,7 @@ CONTRACT competitions : public contract {
         case COMP_STATE_PREPARING.value:
         case COMP_STATE_1_PLAYING.value:
         case COMP_STATE_2_PROCESSING.value:
+        case COMP_STATE_3_AUDITING.value:
             _comps.modify(comp, same_payer, [&](comp_item &c) {
                 c.shards_budget += shards;
             });
@@ -498,7 +500,9 @@ CONTRACT competitions : public contract {
             c.state = COMP_STATE_4_REWARDING;
             c.winnings_claimed += pay_amount;
         });
-        action(permission_level{get_self(), "xfer"_n}, TOKEN_CONTRACT, "transfer"_n, make_tuple(get_self(), comp->admin, pay_amount, memo)).send();
+        if (pay_amount.amount > 0) {
+            action(permission_level{get_self(), "xfer"_n}, TOKEN_CONTRACT, "transfer"_n, make_tuple(get_self(), comp->admin, pay_amount, memo)).send();
+        }
     }
 
     ACTION dispute(uint64_t id, string notice) {
