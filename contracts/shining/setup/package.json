@@ -1,0 +1,53 @@
+{
+  "name": "landholders-batch-runner",
+  "version": "1.0.0",
+  "description": "script to run the landholders contract process and claim actions",
+  "main": "index.js",
+  "engines": {
+    "node": ">=17.3.0 <18.0.0",
+    "npm": ">=8.3.0 <9.0.0"
+  },
+  "scripts": {
+    "run": "node dist/landholder-runner-daemon.js",
+    "build": "node ./scripts/create-env.js && yarn clean && tsc -p .",
+    "prepare": "husky install",
+    "lint": "yarn lint-prettier && yarn lint-es",
+    "lint-fix": "yarn lint-prettier-fix && yarn lint-es-fix",
+    "lint-es": "eslint \"src/**/*\"",
+    "lint-es-fix": "eslint --fix \"src/**/*\"",
+    "lint-prettier": "yarn prettier --check \"src/\"",
+    "lint-prettier-fix": "yarn prettier --write \"src/\"",
+    "test:unit": "jest --config=jest.config.unit.js",
+    "test:api": "jest --config=jest.config.api.js",
+    "build-tests:api": "node ./scripts/create-env.js && yarn clean && tsc",
+    "clean": "rm -rf ./dist",
+    "abis": "mkdir -p ./dist/abis && node dist/fetch_abis.js ./dist/abis",
+    "mongo-indexes": "node dist/mongo_setup.js",
+    "api": "tsc-watch --onSuccess \"node dist/index.js\"",
+    "blockrange": "tsc-watch --onSuccess \"node dist/blockrange.js\"",
+    "filler": "tsc-watch --onSuccess \"node dist/filler.js ${flags}\"",
+    "processor": "tsc-watch --onSuccess \"node dist/processor.js\""
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "lint-staged && yarn test:unit"
+    }
+  },
+  "lint-staged": {
+    "*": "prettier --write --ignore-unknown",
+    "*.{ts,tsx,js,jsx}": "eslint --fix'"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "eosio-helpers": "^0.1.15",
+    "eosjs": "^22.0.0",
+    "node-fetch": "2.6",
+    "sha256-uint8array": "^0.10.1",
+    "tsc": "^2.0.3"
+  },
+  "devDependencies": {
+    "typescript": "^4.5.4"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "C_Cpp.default.includePath": [
+    "/usr/local/eosio.cdt/include",
+    "/usr/local/Cellar/eosio.cdt/1.7.0/opt/eosio.cdt/include"
+  ]
+}

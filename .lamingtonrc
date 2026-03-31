@@ -1,0 +1,50 @@
+{
+  "cdt": "https://github.com/EOSIO/eosio.cdt/releases/download/v1.8.1/eosio.cdt_1.8.1-1-ubuntu-18.04_amd64.deb",
+  "eos": "https://github.com/AntelopeIO/leap/releases/download/v5.0.3/leap_5.0.3_amd64.deb",
+  "contracts": "v1.9.2",
+  "debug": 0,
+  "debugTransactions": false,
+  "bailOnFailure": true,
+  "keepAlive": true,
+  "reporter": "List",
+  "outDir": "artifacts",
+  "skipSystemContracts": false,
+  "cppFlags": "-I=/opt/eosio/bin/project/contracts/atomicassets-contracts/include",
+  "compiledContractsSearchPaths": [
+    "artifacts/compiled_contracts"
+  ],
+  "excludeTests": [
+    "**/contracts/eosdac-contracts/**"
+  ],
+  "benchmark": false,
+  "include": [
+    "alwgladiator.cpp",
+    "daccustodian.cpp",
+    "tlm.token.cpp",
+    "federation.cpp",
+    "infl.cpp",
+    "landholders.cpp",
+    "mining.cpp",
+    "orngwax.cpp",
+    "packopener.cpp",
+    "shining.cpp",
+    "landboost.cpp",
+    "userpoints.cpp",
+    "eosdactokens.cpp",
+    "dacdirectory.cpp",
+    "stakevote.cpp",
+    "dacdirectory.cpp",
+    "eosio.token.cpp",
+    "notify.cpp",
+    "pointsproxy.cpp",
+    "nftmintctl.cpp",
+    "testmarket.cpp",
+    "planets.cpp",
+    "staking.cpp",
+    "schedulepay.cpp",
+    "competitions.cpp",
+    "tokelore.cpp",
+    "autoteleport.cpp",
+    "mock.teleport.cpp"
+  ]
+}

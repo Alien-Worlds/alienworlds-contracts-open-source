@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "atomicassets": "^1.1.1",
+    "child_process": "^1.0.2",
+    "csv-parser": "^2.3.2",
+    "eosjs": "^20.0.3",
+    "int64-buffer": "^0.99.1007",
+    "node-fetch": "^2.6.7",
+    "text-encoding": "^0.7.0"
+  }
+}
