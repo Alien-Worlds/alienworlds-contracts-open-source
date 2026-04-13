@@ -62,7 +62,7 @@ CONTRACT tokelore : public contract {
         uint64_t       quorum_percent_x100; // Percentage with 2 decimal places, eg. 5001 == 50.01%
         uint16_t       pass_percent_x100;   // Percentage with 2 decimal places, eg. 1001 == 10.01%
         asset          total_staked     = asset(0, symbol("TLM", 4));
-        asset          total_unstaking  = asset(0, symbol("TLM", 4));
+        asset          reward_pot       = asset(0, symbol("TLM", 4));
         asset          total_vote_power = asset(0, VP_SYM);
         asset          power_per_day    = asset(0, VP_SYM);
         time_point_sec last_update;
@@ -189,6 +189,7 @@ CONTRACT tokelore : public contract {
     ACTION stake(name account);
     ACTION unstake(name account);
     ACTION refund(name account);
+    ACTION fillpot(name filler);
     ACTION publresult(proposal_data proposal);
     ACTION checkstatus(uint64_t proposal_id);
     ACTION settemplid(uint32_t template_id);

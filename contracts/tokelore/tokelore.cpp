@@ -175,6 +175,21 @@ asset tokelore::accruedPowerSinceLastClaimTime(asset votePower, time_point_sec l
     return asset{result, VP_SYM};
 }
 
+// currently stakers have been accumulating 0.0001 VP every 10 minutes per staked TLM, so if a staker has 100 TLM staked, they would be accumulating 0.01 VP
+// every 10 minutes, which is 0.001 VP every minute, which is 0.0000166667 VP every second. So if a staker has 100 TLM staked for 1 day (86400 seconds), they
+// would have accrued approximately 1.44 VP in that day.
+// The current max vote power is over 6m VP but hasn't acted for over 1 year.
+// The max is 10m VP all up.
+void tokelore::fillpot(name filler) {
+    require_auth(filler);
+
+    deposits_table deposits(get_self(), get_self().value);
+    auto           deposit_itr = deposits.require_find(filler.value, "ERR::NO_DEPOSIT::This account does not have any deposit");
+    updateGlobalVotePowerToCurrentTime();
+    current_globals2.reward_pot += deposit_itr->deposit;
+    deposits.erase(deposit_itr);
+}
+
 void tokelore::propose(uint64_t proposal_id, name proposer, string title, name type, atomicassets::ATTRIBUTE_MAP attributes) {
 
     require_auth(proposer);
@@ -249,6 +264,15 @@ void tokelore::vote(name voter, uint64_t proposal_id, name vote, asset vote_powe
         }
         p.status = get_status(p).status;
     });
+    auto reward =
+        current_globals2.reward_pot.amount > 0 ? (vote_power.amount * current_globals2.reward_pot.amount) / current_globals2.total_vote_power.amount : 0;
+    if (reward > 0) {
+        action(permission_level{get_self(), "active"_n}, "alien.worlds"_n, "transfer"_n,
+            make_tuple(get_self(), voter, asset(reward, TLM_SYM), string("Reward for voting on proposal ") + to_string(proposal_id)))
+            .send();
+        current_globals2.reward_pot.amount -= reward;
+        check(current_globals2.reward_pot.amount >= 0, "ERR::INVALID_REWARD_POT::Reward pot cannot be negative");
+    }
     if (prop->status == TOKELORE_STATUS_PASSING && now() >= prop->earliest_exec) {
         exec(proposal_id);
     }
