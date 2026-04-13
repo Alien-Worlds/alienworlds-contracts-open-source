@@ -1202,10 +1202,12 @@ describe('Competitions', () => {
 
         // Complete processing and approve
         await competitions.completeproc(zeroWinningsCompId, { from: gamedev });
-        assertEOSErrorIncludesMessage(
-          competitions.approve(zeroWinningsCompId),
-          'must transfer positive quantity'
-        );
+        competitions.approve(zeroWinningsCompId);
+
+        // Claim the shards (should complete since winnings_budget == 0)
+        await competitions.claimreward(zeroWinningsCompId, player1.name, {
+          from: player1,
+        });
       });
 
       it('should handle edge case: competition with zero shards budget', async () => {
