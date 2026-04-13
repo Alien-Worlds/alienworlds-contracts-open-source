@@ -1004,6 +1004,166 @@ describe('TokeLore', async () => {
       });
     });
   });
+
+  context('fillpot', async () => {
+    const fillAmount = '50.0000 TLM';
+
+    before(async () => {
+      await shared.eosioToken.transfer(
+        user2.name,
+        tokeLore.account.name,
+        fillAmount,
+        'for filling pot',
+        { from: user2 }
+      );
+    });
+
+    context('with no deposit', async () => {
+      it('should fail with no deposit error', async () => {
+        await assertEOSErrorIncludesMessage(
+          tokeLore.fillpot(voter2.name, { from: voter2 }),
+          'ERR::NO_DEPOSIT'
+        );
+      });
+    });
+
+    context('with wrong auth', async () => {
+      it('should fail with missing authority', async () => {
+        await assertMissingAuthority(
+          tokeLore.fillpot(user2.name, { from: user1 })
+        );
+      });
+    });
+
+    context('with correct auth and deposit', async () => {
+      let rewardPotBefore: number;
+
+      before(async () => {
+        const globals = (await tokeLore.globals2Table()).rows[0];
+        rewardPotBefore = new Asset(globals.reward_pot.toString()).amount_raw();
+      });
+
+      it('should fill the pot successfully', async () => {
+        await tokeLore.fillpot(user2.name, { from: user2 });
+      });
+
+      it('should have removed the deposit', async () => {
+        const deposit = (await tokeLore.depositsTable()).rows.find(
+          (d) => d.account === user2.name
+        );
+        chai.expect(deposit).to.be.undefined;
+      });
+
+      it('should have increased reward_pot by fill amount', async () => {
+        const globals = (await tokeLore.globals2Table()).rows[0];
+        const rewardPotAfter = new Asset(
+          globals.reward_pot.toString()
+        ).amount_raw();
+        chai
+          .expect(rewardPotAfter)
+          .to.equal(rewardPotBefore + new Asset(fillAmount).amount_raw());
+      });
+    });
+  });
+
+  context('voting reward', async () => {
+    let voterBalanceBefore: number;
+    let rewardPotBefore: number;
+    let totalVotePowerBefore: number;
+
+    before(async () => {
+      // Stake voter1 so they have vote power
+      await shared.eosioToken.transfer(
+        voter1.name,
+        tokeLore.account.name,
+        '100.0000 TLM',
+        'for staking',
+        { from: voter1 }
+      );
+      await tokeLore.stake(voter1.name, { from: voter1 });
+
+      // Fill the reward pot using user2's fresh deposit
+      await shared.eosioToken.transfer(
+        user2.name,
+        tokeLore.account.name,
+        '100.0000 TLM',
+        'filling reward pot',
+        { from: user2 }
+      );
+      await tokeLore.fillpot(user2.name, { from: user2 });
+
+      // Create a proposal for voter1 to vote on
+      await shared.eosioToken.transfer(
+        user1.name,
+        tokeLore.account.name,
+        '10.0000 TLM',
+        'for proposing',
+        { from: user1 }
+      );
+      await tokeLore.propose(
+        ++proposal_id,
+        user1.name,
+        'voting reward test proposal',
+        'proptype1',
+        [{ key: 'attr1', value: ['string', 'rewardtest'] }],
+        { from: user1 }
+      );
+
+      // Let vote power accrue
+      await sleep(5000);
+    });
+
+    it('should have reward_pot > 0 before voting', async () => {
+      const globals = (await tokeLore.globals2Table()).rows[0];
+      rewardPotBefore = new Asset(globals.reward_pot.toString()).amount_raw();
+      totalVotePowerBefore = new Asset(
+        globals.total_vote_power.toString()
+      ).amount_raw();
+      voterBalanceBefore = await shared.getBalance(voter1.name);
+      chai.expect(rewardPotBefore).to.be.greaterThan(0);
+    });
+
+    it('voter should receive TLM reward when voting with non-zero reward_pot', async () => {
+      await tokeLore.vote(voter1.name, proposal_id, 'yes', '0.0001 VP', {
+        from: voter1,
+      });
+
+      const voterBalanceAfter = await shared.getBalance(voter1.name);
+      chai.expect(voterBalanceAfter).to.be.greaterThan(voterBalanceBefore);
+    });
+
+    it('voter balance increase should be proportional to vote_power / total_vote_power', async () => {
+      const voterBalanceAfter = await shared.getBalance(voter1.name);
+      // raw amounts: reward = (vp_used_raw * pot_raw) / total_vp_raw
+      // 0.0001 VP = 1 raw VP unit; reward_pot and total_vp in their raw units
+      const vpUsedRaw = 1; // 0.0001 VP * 10000
+      const potRaw = Math.round(rewardPotBefore * 10000);
+      const totalVpRaw = Math.round(totalVotePowerBefore * 10000);
+      const expectedRewardRaw = Math.floor((vpUsedRaw * potRaw) / totalVpRaw);
+      const expectedReward = expectedRewardRaw / 10000;
+
+      chai
+        .expect(voterBalanceAfter - voterBalanceBefore)
+        .to.approximately(expectedReward, 0.0001);
+    });
+
+    it('reward_pot should decrease by the reward amount after voting', async () => {
+      const globals = (await tokeLore.globals2Table()).rows[0];
+      const rewardPotAfter = new Asset(
+        globals.reward_pot.toString()
+      ).amount_raw();
+
+      const vpUsedRaw = 1; // 0.0001 VP * 10000
+      const potRaw = Math.round(rewardPotBefore * 10000);
+      const totalVpRaw = Math.round(totalVotePowerBefore * 10000);
+      const expectedRewardRaw = Math.floor((vpUsedRaw * potRaw) / totalVpRaw);
+      const expectedReward = expectedRewardRaw / 10000;
+
+      chai
+        .expect(rewardPotAfter)
+        .to.approximately(rewardPotBefore - expectedReward, 0.0001);
+    });
+  });
 });
 
 class VoterCheck {
