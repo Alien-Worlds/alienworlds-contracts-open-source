@@ -60,18 +60,6 @@ describe('Mining', () => {
     EOSManager.initWithDefaults();
     await createTestAccounts();
     await shared.createPlanet(shared.testplanet, '4,WHATX');
-    await mining.insertclaims(miner1.name, [1, 2, 3, 4, 5, 9996], {
-      from: mining.account,
-    });
-
-    await mining.insertclaims(miner2.name, [11, 12, 13, 14, 15, 16], {
-      from: mining.account,
-    });
-
-    await mining.insertclaims(miner3.name, [21, 22, 23, 22, 25, 26], {
-      from: mining.account,
-    });
-
     authorizer = await AccountManager.createAccount('eye.unn.dac');
     notify_account = await AccountManager.createAccount();
 
@@ -322,42 +310,6 @@ describe('Mining', () => {
         );
         const data = await asset.mutableData();
         chai.expect(data.nickname).to.equal('mynewnick');
-      });
-    });
-  });
-
-  context('claimnfts', async () => {
-    context('with invalid template ids as per above', async () => {
-      it('should fail', async () => {
-        await assertEOSErrorIncludesMessage(
-          mining.claimnfts(miner1.name),
-          'MINING_NFT_TEMPLATE_NOT_FOUND'
-        );
-      });
-    });
-    context('with existing tempate ids', async () => {
-      before(async () => {
-        await mining.insertclaims(miner4.name, [1, 2, 3, 4, 1, 2], {
-          from: mining.account,
-        });
-      });
-      it('should work', async () => {
-        await mining.claimnfts(miner4.name, { from: anybody });
-      });
-      it('should issue nfts', async () => {
-        const res = await atomicassets.assetsTable({ scope: miner4.name });
-        chai
-          .expect(res.rows.filter((x) => x.template_id == 1))
-          .to.have.lengthOf(2);
-        chai
-          .expect(res.rows.filter((x) => x.template_id == 2))
-          .to.have.lengthOf(2);
-        chai
-          .expect(res.rows.filter((x) => x.template_id == 3))
-          .to.have.lengthOf(1);
-        chai
-          .expect(res.rows.filter((x) => x.template_id == 4))
-          .to.have.lengthOf(1);
       });
     });
   });
@@ -1305,70 +1257,6 @@ describe('Mining', () => {
       });
       it('should clear the miners table', async () => {
         await assertRowCount(mining.bagsTable({ scope: mining.name }), 0);
-      });
-    });
-  });
-  context('delnft', async () => {
-    context('without proper auth', async () => {
-      it('should fail with auth error', async () => {
-        await assertMissingAuthority(
-          mining.delnft(miner1.name, { from: anybody })
-        );
-      });
-    });
-    context('with proper auth', async () => {
-      before(async () => {
-        it('miner should have a claims table entry', async () => {
-          const res = await mining.claimsTable({ scope: mining.name });
-          const miner_row = res.rows.filter((x) => x.miner == miner2.name);
-          chai.expect(miner_row).not.to.be.empty;
-        });
-      });
-      it('should work', async () => {
-        await mining.delnft(miner2.name);
-      });
-      it('should clear the claims table for the miner', async () => {
-        const res = await mining.claimsTable({ scope: mining.name });
-        const miner_row = res.rows.filter((x) => x.miner == miner2.name);
-        chai.expect(miner_row).to.be.empty;
-      });
-    });
-    context('when miner has no claims', async () => {
-      it('should throw claim not found error', async () => {
-        await assertEOSErrorIncludesMessage(
-          mining.delnft(miner2.name),
-          'Claim not found'
-        );
-      });
-    });
-  });
-  context('clearnftmine', async () => {
-    let landowner, land_asset;
-    before(async () => {
-      landowner = shared.landowners[0];
-      land_asset = await get_land(landowner);
-    });
-    context('without proper auth', async () => {
-      it('should fail with auth error', async () => {
-        await assertMissingAuthority(
-          mining.clearnftmine(landowner.name, land_asset.asset_id, {
-            from: anybody,
-          })
-        );
-      });
-    });
-    context('with proper auth', async () => {
-      it('should work', async () => {
-        await mining.clearnftmine(landowner.name, land_asset.asset_id);
-      });
-      it('should update mutable data of nft', async () => {
-        const atomic = shared.get_atomic();
-        const asset = await atomic.getAsset(
-          landowner.name,
-          land_asset.asset_id
-        );
-        const data = await asset.mutableData();
-        chai.expect(data).to.deep.equal({});
       });
     });
   });

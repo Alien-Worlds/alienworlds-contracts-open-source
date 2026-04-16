@@ -5,8 +5,7 @@ using namespace alienworlds;
 
 mining::mining(name s, name code, datastream<const char *> ds)
     : contract(s, code, ds), _miners(get_self(), get_self().value), _deposits(get_self(), get_self().value), _bags(get_self(), get_self().value),
-      _claims(get_self(), get_self().value), _tooluse(get_self(), get_self().value), _land_comms(get_self(), get_self().value),
-      _miner_claims(get_self(), get_self().value) {}
+      _tooluse(get_self(), get_self().value), _land_comms(get_self(), get_self().value), _miner_claims(get_self(), get_self().value) {}
 
 #ifdef BOT_CHECK
 #include "../../alienworlds-contracts-private/closed/mining_actions.cpp"
@@ -582,102 +581,6 @@ void mining::clearbags() {
     }
 }
 
-#ifdef IS_DEV
-void mining::clearnftwins() {
-    require_auth(get_self());
-
-    auto wins_data = contr_nftwins::get_current_state(get_self(), get_self());
-
-    wins_data.time = 0;
-
-    wins_data.save(get_self(), get_self(), get_self());
-}
-#endif
-
-void mining::claimnfts(const name miner) {
-    auto claim = _claims.find(miner.value);
-    if (claim != _claims.end()) {
-        for (uint32_t template_id : claim->template_ids) {
-            // Mint the new asset
-            const auto immutable_data     = ATTRIBUTE_MAP{};
-            const auto mutable_data       = ATTRIBUTE_MAP{};
-            const auto quantities_to_back = vector<asset>{};
-
-            const auto templates = atomicassets::templates_t{NFT_CONTRACT, NFT_COLLECTION.value};
-            const auto t =
-                templates.get(template_id, fmt("ERR::MINING_NFT_TEMPLATE_NOT_FOUND::Template with id %s not found, please fix the miningnfts", template_id));
-            action(permission_level{get_self(), "issue"_n}, NFT_CONTRACT, "mintasset"_n,
-                make_tuple(get_self(), NFT_COLLECTION, t.schema_name, template_id, miner, immutable_data, mutable_data, quantities_to_back))
-                .send();
-        }
-        _claims.erase(claim);
-    }
-}
-
-void mining::claimnftpts(const name miner) {
-    name ram_payer = miner;
-    if (!has_auth(get_self())) {
-        require_auth(miner);
-    } else {
-        ram_payer = get_self();
-    }
-
-    const map<uint32_t, uint32_t> const_lookups = {{28422, 58527308}, {56042, 32270699}, {19659, 19667361}, {19579, 19549083}, {19580, 19549083},
-        {19582, 11471225}, {19614, 11471225}, {19623, 11471225}, {235641, 9349410}, {254351, 9349410}, {19575, 6109088}, {19576, 6109088}, {19577, 6109088},
-        {19578, 6109088}, {56039, 3259878}, {19569, 3054544}, {19570, 3054544}, {19571, 3054544}, {19572, 3054544}, {19573, 3054544}, {19574, 3054544},
-        {19581, 3054544}, {19598, 2867806}, {19600, 2867806}, {19608, 2867806}, {19611, 2867806}, {19618, 2867806}, {19630, 2857779}, {19642, 2857779},
-        {19658, 1966736}, {19660, 1966736}, {235640, 1756522}, {254350, 1756522}, {19562, 1527272}, {19563, 1527272}, {19564, 1527272}, {19565, 1527272},
-        {19566, 1527272}, {19567, 1527272}, {19568, 1527272}, {19593, 1433903}, {19595, 1433903}, {19596, 1433903}, {19599, 1433903}, {19601, 1433903},
-        {19612, 1433903}, {19615, 1433903}, {19622, 1433903}, {19624, 1428889}, {19633, 1428889}, {19636, 1428889}, {19645, 1428889}, {19652, 983368},
-        {19653, 983368}, {19654, 983368}, {19655, 983368}, {19587, 716952}, {19589, 716952}, {19590, 716952}, {19592, 716952}, {19597, 716952}, {19602, 716952},
-        {19603, 716952}, {19605, 716952}, {19606, 716952}, {19607, 716952}, {19617, 716952}, {19629, 714445}, {19631, 714445}, {19634, 714445}, {19641, 714445},
-        {19643, 714445}, {19646, 714445}, {17453, 237781}, {19554, 190909}, {19555, 190909}, {19556, 190909}, {19557, 190909}, {19559, 190909}, {19560, 190909},
-        {19561, 190909}, {19650, 122921}, {19651, 119635}, {19656, 119635}, {19657, 119635}, {19584, 89619}, {19585, 89619}, {19586, 89619}, {19588, 89619},
-        {19591, 89619}, {19594, 89619}, {19604, 89619}, {19613, 89619}, {19616, 89619}, {19620, 89619}, {19621, 89619}, {19626, 89306}, {19627, 89306},
-        {19628, 89306}, {19635, 89306}, {19638, 89306}, {19639, 89306}, {19640, 89306}, {19647, 89306}, {19558, 44159}, {19553, 80000}, {19610, 16416},
-        {19625, 16416}, {19644, 16393}, {19583, 15710}, {19648, 15710}, {19649, 15710}, {19609, 15676}, {19619, 15632}, {19632, 15587}, {19637, 15553}};
-
-    auto     claim  = _claims.require_find(miner.value, "ERR::MINING_CLAIM_NOT_FOUND::Claim not found.");
-    uint32_t points = 0;
-
-    auto filtered_template_ids = claim->template_ids;
-    auto temp_ittr             = filtered_template_ids.begin();
-    while (temp_ittr != filtered_template_ids.end()) {
-        auto amount_to_add = const_lookups.find(*temp_ittr);
-        if (amount_to_add != const_lookups.end()) {
-            points    = S{points} + S{amount_to_add->second};
-            temp_ittr = filtered_template_ids.erase(temp_ittr); // Iterator needs to be reset after erase
-        } else {
-            ++temp_ittr; // If no erasure has happened, the iterator needs to be incremented
-        }
-    }
-
-    if (filtered_template_ids.size() > 0) {
-        _claims.modify(claim, ram_payer, [&](claim_item &c) {
-            c.template_ids = filtered_template_ids;
-        });
-        claimnfts(miner);
-    } else {
-        _claims.erase(claim);
-    }
-    // points need to be increased by 30% but it's a uint, so we need to perform the calculation as float, then round
-    // and then convert back to uint
-    const auto points_double = std::round(S{points}.to<double>() * S{1.3});
-    points                   = S{points_double}.to<uint32_t>();
-
-    action(permission_level{USERPOINTS_ACCOUNT, "usrpoints"_n}, USERPOINTS_ACCOUNT, "addpoints"_n, make_tuple(miner, points)).send();
-}
-
-#if defined(MAIN_NET_DEBUG) || defined(IS_DEV)
-void mining::insertclaims(name miner, vector<uint32_t> tmps) {
-    require_auth(get_self());
-    _claims.emplace(get_self(), [&](claim_item &c) {
-        c.miner        = miner;
-        c.template_ids = tmps;
-    });
-}
-#endif
-
 // NFT transfer
 void mining::logtransfer(name collection_name, name from, name to, vector<uint64_t> asset_ids, string memo) {
     // check if the asset is in their bag and if it is, remove it
@@ -700,22 +603,6 @@ void mining::logtransfer(name collection_name, name from, name to, vector<uint64
             });
         }
     }
-}
-
-void mining::clearnftmine(name owner, uint64_t asset_id) {
-    require_auth(get_self());
-
-    ATTRIBUTE_MAP mutable_data = {};
-
-    action(permission_level{get_self(), "issue"_n}, NFT_CONTRACT, "setassetdata"_n, make_tuple(get_self(), owner, asset_id, mutable_data)).send();
-}
-
-void mining::delnft(name miner) {
-    require_auth(get_self());
-
-    auto claim = _claims.find(miner.value);
-    check(claim != _claims.end(), "Claim not found");
-    _claims.erase(claim);
 }
 
 /* Private */

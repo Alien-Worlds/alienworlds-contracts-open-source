@@ -234,24 +234,6 @@ namespace alienworlds {
             }
         };
 
-        struct contr_nftwins;
-        typedef eosio::singleton<"nftwins"_n, contr_nftwins> nftwinscontainer;
-
-        struct [[eosio::table("nftwins")]] contr_nftwins {
-            uint32_t time = 0;
-            uint8_t  oracle_id;
-            uint32_t last_index;
-            uint32_t max_index;
-
-            static contr_nftwins get_current_state(eosio::name account, eosio::name scope) {
-                return nftwinscontainer(account, scope.value).get_or_default(contr_nftwins());
-            }
-
-            void save(eosio::name account, eosio::name scope, eosio::name payer = same_payer) {
-                nftwinscontainer(account, scope.value).set(*this, payer);
-            }
-        };
-
         struct [[eosio::table("tooluse")]] tooluse_item {
             uint64_t asset_id;
             uint32_t last_use;
@@ -299,31 +281,6 @@ namespace alienworlds {
         };
         typedef multi_index<"planets"_n, planet> planets_table;
 
-        /* NFTs held for guest rewards, given to all landholders */
-        struct [[eosio::table("guestnfts")]] guestnft_item {
-            name             id;
-            uint16_t         probability;
-            vector<uint64_t> asset_ids;
-
-            uint64_t primary_key() const {
-                return id.value;
-            }
-        };
-        typedef multi_index<"guestnfts"_n, guestnft_item> guestnfts_table;
-
-        /* Template ids that have been chosen, they must be claimed and minted in a separate tx so that the user cannot
-         * block the minting and get different nfts */
-        struct [[eosio::table("claims")]] claim_item {
-            name             miner;
-            vector<uint32_t> template_ids;
-
-            uint64_t primary_key() const {
-                return miner.value;
-            }
-        };
-
-        typedef multi_index<"claims"_n, claim_item> claims_table;
-
         // clang-format off
         SINGLETON(pltdtapconf, mining, 
             PROPERTY(name, claim_destination);
@@ -350,7 +307,6 @@ namespace alienworlds {
         miners_table      _miners;
         deposits_table    _deposits;
         bags_table        _bags;
-        claims_table      _claims;
         tooluse_table     _tooluse;
         miner_claim_table _miner_claims;
         landcomms_table   _land_comms;
@@ -492,23 +448,6 @@ namespace alienworlds {
         /* Set the current piece of land to mine on */
         ACTION setland(name account, uint64_t land_id);
 
-        /* Claim mining nfts */
-        ACTION claimnfts(const name miner);
-        ACTION claimnftpts(const name miner);
-
-#if defined(MAIN_NET_DEBUG) || defined(IS_DEV)
-        ACTION insertclaims(name miner, vector<uint32_t> tmps);
-#endif
-
-        struct result {
-            name     miner;
-            name     planet_name;
-            uint32_t template_id;
-            name     rarity;
-        };
-#ifdef IS_DEV
-        ACTION clearnftwins();
-#endif
         /* Debug to reset state */
         ACTION resetstate(name planet_name);
 
@@ -519,10 +458,6 @@ namespace alienworlds {
         ACTION clearbags();
 
         ACTION unlockbag(name miner);
-
-        ACTION clearnftmine(name owner, uint64_t asset_id);
-
-        ACTION delnft(name miner);
 
         ACTION setconfig(const std::string &key, const state_value_variant &value);
 
