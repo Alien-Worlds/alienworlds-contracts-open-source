@@ -252,7 +252,7 @@ namespace eosio {
         require_auth(get_self());
 
         const eosio::symbol sym        = {"TLM", 4};
-        const auto          new_issuer = "infl.worlds"_n;
+        const auto          new_issuer = "inflt.worlds"_n;
         const auto          sym_name   = sym.code().raw();
         stats               statstable(get_self(), sym_name);
         const auto          token = statstable.find(sym_name);

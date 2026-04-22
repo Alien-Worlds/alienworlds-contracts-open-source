@@ -327,7 +327,7 @@ describe('tlm.token', () => {
       );
     });
 
-    it('changes issuer to infl.worlds once TLM exists', async () => {
+    it('changes issuer to inflt.worlds once TLM exists', async () => {
       const alt2Token = await l.ContractDeployer.deployWithName<TlmToken>(
         'tlm.token',
         'alt2.token'
@@ -337,7 +337,7 @@ describe('tlm.token', () => {
       });
       await alt2Token.chngissuer({ from: alt2Token.account });
       const stats = await alt2Token.statTable({ scope: 'TLM' });
-      expect(stats.rows[0].issuer).to.equal('infl.worlds');
+      expect(stats.rows[0].issuer).to.equal('inflt.worlds');
     });
 
     it('fails if already set', async () => {

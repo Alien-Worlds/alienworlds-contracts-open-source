@@ -26,7 +26,7 @@ async function claim(config) {
         {
           actions: [
             {
-              account: 'infl.worlds',
+              account: 'inflt.worlds',
               name: 'claim',
               authorization: [
                 {

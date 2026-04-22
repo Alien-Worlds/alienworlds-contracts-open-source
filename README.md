@@ -86,7 +86,7 @@ The architecture illustrates the following key components and their interactions
 - **Mining Contract** (`m.federation`): Central gameplay mechanics
 - **Federation Contract** (`federation`): Game-wide governance
 - **Planets Contract**: Planetary management and governance
-- **Inflation Contract** (`infl/`, account: `infl.worlds`): Daily TLM inflation and planet claims
+- **Inflation Contract** (`infl/`, account: `inflt.worlds`): Daily TLM inflation and planet claims
 
 ### Token & Asset System
 
@@ -185,7 +185,7 @@ The Alien Worlds ecosystem is built on a sophisticated network of interconnected
   - Cross-planetary interactions
   - Federation-level decision making
 
-#### Inflation Contract (`infl/`, account: `infl.worlds`)
+#### Inflation Contract (`infl/`, account: `inflt.worlds`)
 
 - **Purpose**: Calculates and mints daily Trilium inflation, and manages planet claims
 - **Features**:

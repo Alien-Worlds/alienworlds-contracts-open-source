@@ -5,7 +5,7 @@
 using namespace eosio;
 
 static constexpr name FEDERATION_ACCOUNT{"federation"};
-static constexpr name INFLATION_ACCOUNT{"infl.worlds"};
+static constexpr name INFLATION_ACCOUNT{"inflt.worlds"};
 static constexpr name USERPOINTS_ACCOUNT{"uspts.worlds"};
 static constexpr name MINING_CONTRACT{"m.federation"};
 static constexpr name FIGHTING_CONTRACT{"f.federation"};

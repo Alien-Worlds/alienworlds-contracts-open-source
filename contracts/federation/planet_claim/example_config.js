@@ -2,7 +2,7 @@ module.exports = {
   endpoint: '',
   keys: [
     {
-      name: 'infl.worlds',
+      name: 'inflt.worlds',
       claim_key: '',
       permission: 'claim',
     },

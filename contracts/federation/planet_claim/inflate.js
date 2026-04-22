@@ -8,7 +8,7 @@ const fetch = require('node-fetch');
 const config = require('./config');
 
 const keys = config.keys
-  .filter((k) => k.name === 'infl.worlds')
+  .filter((k) => k.name === 'inflt.worlds')
   .map((conf) => {
     return conf.claim_key;
   });
@@ -21,7 +21,7 @@ let api = new Api({ rpc, signatureProvider, textDecoder, textEncoder });
 
 async function claim(config) {
   config.keys
-    .filter((k) => k.name === 'infl.worlds')
+    .filter((k) => k.name === 'inflt.worlds')
     .forEach(async (conf) => {
       try {
         let data = {};
@@ -30,7 +30,7 @@ async function claim(config) {
           {
             actions: [
               {
-                account: 'infl.worlds',
+                account: 'inflt.worlds',
                 name: 'inflate',
                 authorization: [
                   {

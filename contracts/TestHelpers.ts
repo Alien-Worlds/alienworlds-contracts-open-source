@@ -141,7 +141,7 @@ export class SharedTestObjects {
     );
     this.infl = await ContractDeployer.deployWithName<Infl>(
       'infl',
-      'infl.worlds'
+      'inflt.worlds'
     );
     this.userpoints = await ContractDeployer.deployWithName<Userpoints>(
       'userpoints',
