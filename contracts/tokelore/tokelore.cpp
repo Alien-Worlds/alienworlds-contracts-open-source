@@ -185,9 +185,58 @@ void tokelore::fillpot(name filler) {
 
     deposits_table deposits(get_self(), get_self().value);
     auto           deposit_itr = deposits.require_find(filler.value, "ERR::NO_DEPOSIT::This account does not have any deposit");
-    updateGlobalVotePowerToCurrentTime();
-    current_globals2.reward_pot += deposit_itr->deposit;
+    auto           amount      = deposit_itr->deposit;
+
+    // Distribute the deposit across all currently participating VP.
+    // If nobody has voted yet (total_vp_participating == 0), the TLM sits in the pot and will
+    // be distributed when the first fill happens after voters join.
+    if (current_reward_globals.total_vp_participating > 0) {
+        current_reward_globals.reward_per_vp_stored += (uint128_t)amount.amount * REWARD_PRECISION / current_reward_globals.total_vp_participating;
+    }
+    current_reward_globals.reward_pot += amount;
+
     deposits.erase(deposit_itr);
+}
+
+// Settle any pending rewards for a voter before changing their participation state.
+// Must be called before modifying vp_participating or reward_per_vp_paid.
+void tokelore::update_voter_rewards(name voter) {
+    voter_rewards_table rewards(get_self(), get_self().value);
+    auto                entry = rewards.find(voter.value);
+
+    if (entry != rewards.end() && entry->vp_participating > 0) {
+        uint128_t pending = (uint128_t)entry->vp_participating * (current_reward_globals.reward_per_vp_stored - entry->reward_per_vp_paid) / REWARD_PRECISION;
+        if (pending > 0) {
+            rewards.modify(entry, same_payer, [&](voter_reward_info &r) {
+                r.rewards_accrued += (int64_t)pending;
+                r.reward_per_vp_paid = current_reward_globals.reward_per_vp_stored;
+            });
+        }
+    }
+}
+
+void tokelore::claimreward(name voter) {
+    require_auth(voter);
+
+    update_voter_rewards(voter);
+
+    voter_rewards_table rewards(get_self(), get_self().value);
+    auto                entry = rewards.require_find(voter.value, "ERR::NO_REWARDS::No reward entry found for this voter");
+
+    check(entry->rewards_accrued > 0, "ERR::NOTHING_TO_CLAIM::No rewards to claim");
+
+    asset payout = asset(entry->rewards_accrued, TLM_SYM);
+    check(current_reward_globals.reward_pot >= payout, "ERR::INSUFFICIENT_POT::Reward pot has insufficient funds");
+
+    action(permission_level{get_self(), "active"_n}, "alien.worlds"_n, "transfer"_n, make_tuple(get_self(), voter, payout, string("TokeLore voting reward")))
+        .send();
+
+    current_reward_globals.reward_pot -= payout;
+
+    rewards.modify(entry, same_payer, [&](voter_reward_info &r) {
+        r.rewards_accrued    = 0;
+        r.reward_per_vp_paid = current_reward_globals.reward_per_vp_stored;
+    });
 }
 
 void tokelore::propose(uint64_t proposal_id, name proposer, string title, name type, atomicassets::ATTRIBUTE_MAP attributes) {
@@ -264,15 +313,27 @@ void tokelore::vote(name voter, uint64_t proposal_id, name vote, asset vote_powe
         }
         p.status = get_status(p).status;
     });
-    auto reward =
-        current_globals2.reward_pot.amount > 0 ? (vote_power.amount * current_globals2.reward_pot.amount) / current_globals2.total_vote_power.amount : 0;
-    if (reward > 0) {
-        action(permission_level{get_self(), "active"_n}, "alien.worlds"_n, "transfer"_n,
-            make_tuple(get_self(), voter, asset(reward, TLM_SYM), string("Reward for voting on proposal ") + to_string(proposal_id)))
-            .send();
-        current_globals2.reward_pot.amount -= reward;
-        check(current_globals2.reward_pot.amount >= 0, "ERR::INVALID_REWARD_POT::Reward pot cannot be negative");
+    // Settle any rewards accrued since this voter's last interaction, then add their new VP
+    // to the reward pool so future pot fills benefit them proportionally.
+    update_voter_rewards(voter);
+
+    voter_rewards_table rewards(get_self(), get_self().value);
+    auto                reward_entry = rewards.find(voter.value);
+
+    if (reward_entry == rewards.end()) {
+        rewards.emplace(get_self(), [&](voter_reward_info &r) {
+            r.voter              = voter;
+            r.vp_participating   = vote_power.amount;
+            r.reward_per_vp_paid = current_reward_globals.reward_per_vp_stored;
+            r.rewards_accrued    = 0;
+        });
+    } else {
+        rewards.modify(reward_entry, same_payer, [&](voter_reward_info &r) {
+            r.vp_participating += vote_power.amount;
+        });
     }
+    current_reward_globals.total_vp_participating += vote_power.amount;
+
     if (prop->status == TOKELORE_STATUS_PASSING && now() >= prop->earliest_exec) {
         exec(proposal_id);
     }
