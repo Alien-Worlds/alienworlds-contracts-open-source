@@ -28,6 +28,10 @@ static constexpr eosio::name TOKELORE_STATUS_COMPLETE{"complete"};
 
 static constexpr symbol VP_SYM{"VP", 4};
 
+// Precision multiplier to avoid truncation when dividing small rewards across large VP totals.
+// TLM has 4 decimals (max raw ~10^14) × 10^12 = ~10^26, well within uint128_t (~3.4×10^38).
+static constexpr uint64_t REWARD_PRECISION = 1000000000000ULL; // 1e12
+
 CONTRACT tokelore : public contract {
 
   public:
@@ -62,7 +66,7 @@ CONTRACT tokelore : public contract {
         uint64_t       quorum_percent_x100; // Percentage with 2 decimal places, eg. 5001 == 50.01%
         uint16_t       pass_percent_x100;   // Percentage with 2 decimal places, eg. 1001 == 10.01%
         asset          total_staked     = asset(0, symbol("TLM", 4));
-        asset          reward_pot       = asset(0, symbol("TLM", 4));
+        asset          total_unstaking  = asset(0, symbol("TLM", 4));
         asset          total_vote_power = asset(0, VP_SYM);
         asset          power_per_day    = asset(0, VP_SYM);
         time_point_sec last_update;
@@ -76,6 +80,37 @@ CONTRACT tokelore : public contract {
             globals_container2(account, scope.value).set(*this, payer);
         }
     };
+
+    // Reward globals singleton — tracks the Synthetix-style accumulator for voting rewards.
+    // Kept separate from globals2 to avoid schema migration of the existing singleton.
+    struct reward_globals_item;
+    using reward_globals_container = eosio::singleton<"rewardglob"_n, reward_globals_item>;
+    struct [[eosio::table("rewardglob"), eosio::contract("tokelore")]] reward_globals_item {
+        asset     reward_pot             = asset(0, symbol("TLM", 4));
+        uint128_t reward_per_vp_stored   = 0; // scaled by REWARD_PRECISION to preserve precision
+        int64_t   total_vp_participating = 0; // raw VP amount (4 decimals) from all voters who have voted
+
+        static reward_globals_item get_current(eosio::name account, eosio::name scope) {
+            return reward_globals_container(account, scope.value).get_or_default(reward_globals_item());
+        }
+
+        void save(eosio::name account, eosio::name scope, eosio::name payer = same_payer) {
+            reward_globals_container(account, scope.value).set(*this, payer);
+        }
+    };
+
+    // Per-voter reward tracking — records each voter's accumulated entitlement.
+    struct [[eosio::table("voterreward"), eosio::contract("tokelore")]] voter_reward_info {
+        name      voter;
+        int64_t   vp_participating   = 0; // total raw VP this voter has committed via voting
+        uint128_t reward_per_vp_paid = 0; // snapshot of reward_per_vp_stored at last interaction
+        int64_t   rewards_accrued    = 0; // unclaimed rewards in raw TLM (4 decimals)
+
+        uint64_t primary_key() const {
+            return voter.value;
+        }
+    };
+    using voter_rewards_table = eosio::multi_index<"voterreward"_n, voter_reward_info>;
 
     struct [[eosio::table("proposals"), eosio::contract("tokelore")]] proposal_data {
         uint64_t                    proposal_id;
@@ -136,7 +171,8 @@ CONTRACT tokelore : public contract {
     };
     using deposits_table = eosio::multi_index<"deposits"_n, deposit_info>;
 
-    globals_item2 current_globals2;
+    globals_item2       current_globals2;
+    reward_globals_item current_reward_globals;
 
     struct status_result {
         name   status;
@@ -156,15 +192,18 @@ CONTRACT tokelore : public contract {
     asset accruedPowerSinceLastClaimTime(asset votePower, time_point_sec last_claim_time);
 
     void subtract_total_vote_power(asset vote_power);
+    void update_voter_rewards(name voter);
 
   public:
     using contract::contract;
     tokelore(eosio::name receiver, eosio::name code, datastream<const char *> ds) : contract(receiver, code, ds) {
-        current_globals2 = globals_item2::get_current_configs(get_self(), get_self());
+        current_globals2       = globals_item2::get_current_configs(get_self(), get_self());
+        current_reward_globals = reward_globals_item::get_current(get_self(), get_self());
     }
 
     ~tokelore() {
         current_globals2.save(get_self(), get_self(), get_self());
+        current_reward_globals.save(get_self(), get_self(), get_self());
     }
 
     // Actions
@@ -190,6 +229,7 @@ CONTRACT tokelore : public contract {
     ACTION unstake(name account);
     ACTION refund(name account);
     ACTION fillpot(name filler);
+    ACTION claimreward(name voter);
     ACTION publresult(proposal_data proposal);
     ACTION checkstatus(uint64_t proposal_id);
     ACTION settemplid(uint32_t template_id);

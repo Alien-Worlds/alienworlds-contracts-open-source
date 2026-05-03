@@ -6,6 +6,7 @@ import {
   AccountManager,
   UpdateAuth,
   Asset,
+  EOSManager,
 } from 'lamington';
 import { SharedTestObjects } from '../TestHelpers';
 import {
@@ -1039,8 +1040,8 @@ describe('TokeLore', async () => {
       let rewardPotBefore: number;
 
       before(async () => {
-        const globals = (await tokeLore.globals2Table()).rows[0];
-        rewardPotBefore = new Asset(globals.reward_pot.toString()).amount_raw();
+        const rewardGlob = await getRewardGlobals();
+        rewardPotBefore = new Asset(rewardGlob.reward_pot).amount_raw();
       });
 
       it('should fill the pot successfully', async () => {
@@ -1055,10 +1056,8 @@ describe('TokeLore', async () => {
       });
 
       it('should have increased reward_pot by fill amount', async () => {
-        const globals = (await tokeLore.globals2Table()).rows[0];
-        const rewardPotAfter = new Asset(
-          globals.reward_pot.toString()
-        ).amount_raw();
+        const rewardGlob = await getRewardGlobals();
+        const rewardPotAfter = new Asset(rewardGlob.reward_pot).amount_raw();
         chai
           .expect(rewardPotAfter)
           .to.equal(rewardPotBefore + new Asset(fillAmount).amount_raw());
@@ -1066,10 +1065,14 @@ describe('TokeLore', async () => {
     });
   });
 
-  context('voting reward', async () => {
+  context('voting reward (Synthetix-style)', async () => {
+    // Flow: voter stakes → votes (VP registered) → filler fills pot →
+    //       reward_per_vp_stored increases → voter calls claimreward → receives TLM
+
     let voterBalanceBefore: number;
-    let rewardPotBefore: number;
-    let totalVotePowerBefore: number;
+    let rewardPotAfterFill: number;
+    const potFillAmount = '200.0000 TLM';
+    const voteAmount = '0.0001 VP';
 
     before(async () => {
       // Stake voter1 so they have vote power
@@ -1081,16 +1084,6 @@ describe('TokeLore', async () => {
         { from: voter1 }
       );
       await tokeLore.stake(voter1.name, { from: voter1 });
-
-      // Fill the reward pot using user2's fresh deposit
-      await shared.eosioToken.transfer(
-        user2.name,
-        tokeLore.account.name,
-        '100.0000 TLM',
-        'filling reward pot',
-        { from: user2 }
-      );
-      await tokeLore.fillpot(user2.name, { from: user2 });
 
       // Create a proposal for voter1 to vote on
       await shared.eosioToken.transfer(
@@ -1109,62 +1102,133 @@ describe('TokeLore', async () => {
         { from: user1 }
       );
 
-      // Let vote power accrue
+      // Let vote power accrue before voting
       await sleep(5000);
-    });
 
-    it('should have reward_pot > 0 before voting', async () => {
-      const globals = (await tokeLore.globals2Table()).rows[0];
-      rewardPotBefore = new Asset(globals.reward_pot.toString()).amount_raw();
-      totalVotePowerBefore = new Asset(
-        globals.total_vote_power.toString()
-      ).amount_raw();
-      voterBalanceBefore = await shared.getBalance(voter1.name);
-      chai.expect(rewardPotBefore).to.be.greaterThan(0);
-    });
-
-    it('voter should receive TLM reward when voting with non-zero reward_pot', async () => {
-      await tokeLore.vote(voter1.name, proposal_id, 'yes', '0.0001 VP', {
+      // voter1 votes — this registers their VP in the voterreward table
+      await tokeLore.vote(voter1.name, proposal_id, 'yes', voteAmount, {
         from: voter1,
       });
+
+      // Capture voter balance before the pot is filled (no rewards yet)
+      voterBalanceBefore = await shared.getBalance(voter1.name);
+
+      // Now fill the pot — this distributes rewards to all participating VP
+      await shared.eosioToken.transfer(
+        user2.name,
+        tokeLore.account.name,
+        potFillAmount,
+        'filling reward pot',
+        { from: user2 }
+      );
+      await tokeLore.fillpot(user2.name, { from: user2 });
+
+      const globsAfterFill = await getRewardGlobals();
+      rewardPotAfterFill = new Asset(globsAfterFill.reward_pot).amount_raw();
+    });
+
+    it('should have reward_pot > 0 after fillpot', async () => {
+      chai.expect(rewardPotAfterFill).to.be.greaterThan(0);
+    });
+
+    it('voter should have accrued rewards after the pot is filled', async () => {
+      const reward = await getVoterReward(voter1.name);
+      // reward_per_vp_stored > reward_per_vp_paid, so pending rewards exist
+      // We don't check exact accrued yet (it's settled on claimreward), but the
+      // global accumulator should have moved
+      const globs = await getRewardGlobals();
+      chai.expect(Number(globs.reward_per_vp_stored)).to.be.greaterThan(0);
+    });
+
+    it('claimreward should fail with no rewards if voter has not participated', async () => {
+      await assertEOSErrorIncludesMessage(
+        tokeLore.claimreward(voter2.name, { from: voter2 }),
+        'ERR::NO_REWARDS'
+      );
+    });
+
+    it('voter should receive TLM on claimreward', async () => {
+      await tokeLore.claimreward(voter1.name, { from: voter1 });
 
       const voterBalanceAfter = await shared.getBalance(voter1.name);
       chai.expect(voterBalanceAfter).to.be.greaterThan(voterBalanceBefore);
     });
 
-    it('voter balance increase should be proportional to vote_power / total_vote_power', async () => {
+    it('claimed reward should equal the full pot fill (sole participant)', async () => {
       const voterBalanceAfter = await shared.getBalance(voter1.name);
-      // raw amounts: reward = (vp_used_raw * pot_raw) / total_vp_raw
-      // 0.0001 VP = 1 raw VP unit; reward_pot and total_vp in their raw units
-      const vpUsedRaw = 1; // 0.0001 VP * 10000
-      const potRaw = Math.round(rewardPotBefore * 10000);
-      const totalVpRaw = Math.round(totalVotePowerBefore * 10000);
-      const expectedRewardRaw = Math.floor((vpUsedRaw * potRaw) / totalVpRaw);
-      const expectedReward = expectedRewardRaw / 10000;
-
+      // voter1 is the only participant so reward = full pot fill amount
       chai
         .expect(voterBalanceAfter - voterBalanceBefore)
-        .to.approximately(expectedReward, 0.0001);
+        .to.approximately(new Asset(potFillAmount).amount_raw(), 0.0001);
     });
 
-    it('reward_pot should decrease by the reward amount after voting', async () => {
-      const globals = (await tokeLore.globals2Table()).rows[0];
-      const rewardPotAfter = new Asset(
-        globals.reward_pot.toString()
-      ).amount_raw();
+    it('reward_pot should be empty after sole voter claims', async () => {
+      const globs = await getRewardGlobals();
+      const remainingPot = new Asset(globs.reward_pot).amount_raw();
+      chai.expect(remainingPot).to.approximately(0, 0.0001);
+    });
 
-      const vpUsedRaw = 1; // 0.0001 VP * 10000
-      const potRaw = Math.round(rewardPotBefore * 10000);
-      const totalVpRaw = Math.round(totalVotePowerBefore * 10000);
-      const expectedRewardRaw = Math.floor((vpUsedRaw * potRaw) / totalVpRaw);
-      const expectedReward = expectedRewardRaw / 10000;
+    it('rewards_accrued should be zero after claiming', async () => {
+      const reward = await getVoterReward(voter1.name);
+      chai.expect(reward.rewards_accrued).to.equal(0);
+    });
 
-      chai
-        .expect(rewardPotAfter)
-        .to.approximately(rewardPotBefore - expectedReward, 0.0001);
+    it('claimreward should fail with nothing to claim after already claimed', async () => {
+      await assertEOSErrorIncludesMessage(
+        tokeLore.claimreward(voter1.name, { from: voter1 }),
+        'ERR::NOTHING_TO_CLAIM'
+      );
     });
   });
 });
+
+// ── Helpers for reward tables (not yet in generated bindings) ─────────────────
+
+async function getRewardGlobals(): Promise<{
+  reward_pot: string;
+  reward_per_vp_stored: number | string;
+  total_vp_participating: number;
+}> {
+  const res = await EOSManager.api.rpc.get_table_rows({
+    code: tokeLore.account.name,
+    scope: tokeLore.account.name,
+    table: 'rewardglob',
+    json: true,
+    limit: 1,
+  });
+  return (
+    res.rows[0] ?? {
+      reward_pot: '0.0000 TLM',
+      reward_per_vp_stored: 0,
+      total_vp_participating: 0,
+    }
+  );
+}
+
+async function getVoterReward(voter: string): Promise<{
+  voter: string;
+  vp_participating: number;
+  reward_per_vp_paid: number | string;
+  rewards_accrued: number;
+}> {
+  const res = await EOSManager.api.rpc.get_table_rows({
+    code: tokeLore.account.name,
+    scope: tokeLore.account.name,
+    table: 'voterreward',
+    json: true,
+    lower_bound: voter,
+    upper_bound: voter,
+    limit: 1,
+  });
+  return (
+    res.rows[0] ?? {
+      voter,
+      vp_participating: 0,
+      reward_per_vp_paid: 0,
+      rewards_accrued: 0,
+    }
+  );
+}
 
 class VoterCheck {
   initial_voter_info: TokeloreVoterInfo2;
