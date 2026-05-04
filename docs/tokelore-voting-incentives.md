@@ -15,7 +15,7 @@ The design rewards voters who commit vote power to proposals — not just staker
 Vote Power is earned passively by staking TLM over time. It is not transferable and decays when spent on a vote.
 
 - Staking TLM causes VP to accrue at a configurable rate (`power_per_day`)
-- Default rate: `144 VP` per day per `10,000 TLM` staked (i.e. 0.0001 VP per second per TLM staked)
+- Default rate: `144 VP` per day per `10,000 TLM` staked (i.e. ~0.000000167 VP per second per TLM staked)
 - VP is consumed when casting a vote — spending VP is the act that earns rewards
 
 ### The Reward Pot
@@ -61,7 +61,7 @@ alice calls stake("alice")
 
 Alice now has `1000 TLM` staked. Her VP begins accruing at ~`0.0001 VP/sec` per TLM.
 
-After 1 day: Alice has accrued ~`8.64 VP`.
+After 1 day: Alice has accrued ~`14.4 VP`.
 
 ### 2. Cast a Vote
 

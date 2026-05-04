@@ -1163,7 +1163,6 @@ describe('TokeLore', async () => {
     });
 
     it('voter should have accrued rewards after the pot is filled', async () => {
-      const reward = await getVoterReward(voter1.name);
       // reward_per_vp_stored > reward_per_vp_paid, so pending rewards exist
       // We don't check exact accrued yet (it's settled on claimreward), but the
       // global accumulator should have moved

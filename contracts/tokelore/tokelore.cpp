@@ -206,12 +206,13 @@ void tokelore::update_voter_rewards(name voter) {
 
     if (entry != rewards.end() && entry->vp_participating > 0) {
         uint128_t pending = (uint128_t)entry->vp_participating * (current_reward_globals.reward_per_vp_stored - entry->reward_per_vp_paid) / REWARD_PRECISION;
-        if (pending > 0) {
-            rewards.modify(entry, same_payer, [&](voter_reward_info &r) {
+        check(pending <= (uint128_t)INT64_MAX, "ERR::REWARD_OVERFLOW::Pending reward exceeds maximum storable value");
+        rewards.modify(entry, same_payer, [&](voter_reward_info &r) {
+            if (pending > 0) {
                 r.rewards_accrued += (int64_t)pending;
-                r.reward_per_vp_paid = current_reward_globals.reward_per_vp_stored;
-            });
-        }
+            }
+            r.reward_per_vp_paid = current_reward_globals.reward_per_vp_stored;
+        });
     }
 }
 
