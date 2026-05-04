@@ -1202,7 +1202,7 @@ describe('Competitions', () => {
 
         // Complete processing and approve
         await competitions.completeproc(zeroWinningsCompId, { from: gamedev });
-        competitions.approve(zeroWinningsCompId);
+        await competitions.approve(zeroWinningsCompId);
 
         // Claim the shards (should complete since winnings_budget == 0)
         await competitions.claimreward(zeroWinningsCompId, player1.name, {
