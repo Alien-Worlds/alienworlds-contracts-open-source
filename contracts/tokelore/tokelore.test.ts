@@ -1070,11 +1070,25 @@ describe('TokeLore', async () => {
     //       reward_per_vp_stored increases → voter calls claimreward → receives TLM
 
     let voterBalanceBefore: number;
-    let rewardPotAfterFill: number;
+    let rewardPotAfterFill: number; // raw units (amount_raw)
+    let expectedRewardTlm: number; // decimal TLM  (for balance comparison)
+    let expectedRewardRaw: number; // raw units     (for pot comparison)
     const potFillAmount = '200.0000 TLM';
     const voteAmount = '0.0001 VP';
+    const REWARD_PRECISION = BigInt('1000000000000'); // 1e12, matches contract
 
     before(async () => {
+      // Restore a long proposal duration — prior contexts may have set it to 5s
+      await tokeLore.updateconfig(
+        {
+          duration: 600,
+          fee: '10.0000 TLM',
+          pass_percent_x100: 8000,
+          quorum_percent_x100: 2000,
+        },
+        { from: tokeLore.account }
+      );
+
       // Stake voter1 so they have vote power
       await shared.eosioToken.transfer(
         voter1.name,
@@ -1110,10 +1124,18 @@ describe('TokeLore', async () => {
         from: voter1,
       });
 
+      // Capture accumulator snapshot at vote time — this equals voter1's reward_per_vp_paid.
+      // Also capture rewards_accrued: update_voter_rewards() runs inside vote() and may
+      // settle rewards from earlier fills into rewards_accrued before we read it here.
+      const globsAtVoteTime = await getRewardGlobals();
+      const rpsAtVoteTime = BigInt(globsAtVoteTime.reward_per_vp_stored);
+      const voter1Entry = await getVoterReward(voter1.name);
+      const voter1VpRaw = BigInt(voter1Entry.vp_participating);
+
       // Capture voter balance before the pot is filled (no rewards yet)
       voterBalanceBefore = await shared.getBalance(voter1.name);
 
-      // Now fill the pot — this distributes rewards to all participating VP
+      // Now fill the pot — this increases reward_per_vp_stored proportionally
       await shared.eosioToken.transfer(
         user2.name,
         tokeLore.account.name,
@@ -1125,6 +1147,15 @@ describe('TokeLore', async () => {
 
       const globsAfterFill = await getRewardGlobals();
       rewardPotAfterFill = new Asset(globsAfterFill.reward_pot).amount_raw();
+
+      // Expected reward = already-accrued rewards settled during vote() +
+      //                   voter1's VP × (rps_after_fill − rps_at_vote) / PRECISION
+      const rpsAfterFill = BigInt(globsAfterFill.reward_per_vp_stored);
+      const rpsDelta = rpsAfterFill - rpsAtVoteTime;
+      const newRewardRaw = (voter1VpRaw * rpsDelta) / REWARD_PRECISION;
+      const accruedRaw = voter1Entry.rewards_accrued; // already in raw units
+      expectedRewardRaw = accruedRaw + Number(newRewardRaw);
+      expectedRewardTlm = expectedRewardRaw / 10000;
     });
 
     it('should have reward_pot > 0 after fillpot', async () => {
@@ -1154,18 +1185,19 @@ describe('TokeLore', async () => {
       chai.expect(voterBalanceAfter).to.be.greaterThan(voterBalanceBefore);
     });
 
-    it('claimed reward should equal the full pot fill (sole participant)', async () => {
+    it("claimed reward should match voter1's pro-rata share of the fill", async () => {
       const voterBalanceAfter = await shared.getBalance(voter1.name);
-      // voter1 is the only participant so reward = full pot fill amount
       chai
         .expect(voterBalanceAfter - voterBalanceBefore)
-        .to.approximately(new Asset(potFillAmount).amount_raw(), 0.0001);
+        .to.approximately(expectedRewardTlm, 0.0001);
     });
 
-    it('reward_pot should be empty after sole voter claims', async () => {
+    it('reward_pot should have decreased by the claimed amount', async () => {
       const globs = await getRewardGlobals();
       const remainingPot = new Asset(globs.reward_pot).amount_raw();
-      chai.expect(remainingPot).to.approximately(0, 0.0001);
+      chai
+        .expect(remainingPot)
+        .to.approximately(rewardPotAfterFill - expectedRewardRaw, 1);
     });
 
     it('rewards_accrued should be zero after claiming', async () => {
@@ -1174,6 +1206,7 @@ describe('TokeLore', async () => {
     });
 
     it('claimreward should fail with nothing to claim after already claimed', async () => {
+      await sleep(1000); // avoid duplicate transaction hash from same-block replay
       await assertEOSErrorIncludesMessage(
         tokeLore.claimreward(voter1.name, { from: voter1 }),
         'ERR::NOTHING_TO_CLAIM'
