@@ -322,7 +322,7 @@ void tokelore::vote(name voter, uint64_t proposal_id, name vote, asset vote_powe
     auto                reward_entry = rewards.find(voter.value);
 
     if (reward_entry == rewards.end()) {
-        rewards.emplace(get_self(), [&](voter_reward_info &r) {
+        rewards.emplace(voter, [&](voter_reward_info &r) {
             r.voter              = voter;
             r.vp_participating   = vote_power.amount;
             r.reward_per_vp_paid = current_reward_globals.reward_per_vp_stored;
