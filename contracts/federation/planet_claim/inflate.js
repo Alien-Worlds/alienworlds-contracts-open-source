@@ -52,9 +52,9 @@ async function claim(config) {
       } catch (e) {
         let msg = e.message;
 
-        if (msg.indexOf('Last fill was less than 24 hours ago') === -1) {
-          console.error(`Failed to claim landowner allocation - ${e.message}`);
-        }
+        // if (msg.indexOf('Last fill was less than 24 hours ago') === -1) {
+        console.error(`Failed to claim landowner allocation - ${msg}`);
+        // }
       }
     });
 }
