@@ -42,57 +42,6 @@ const dac_accounts = new Map([
   ['neri.world', 'neri.wp.dac'],
   ['veles.world', 'veles.wp.dac'],
 ]);
-describe('Infl migration', () => {
-  let unauthorized: Account;
-
-  before(async () => {
-    shared = await SharedTestObjects.getInstance();
-    unauthorized = await AccountManager.createAccount('inflmigrant');
-  });
-
-  it('should require infl auth to migrate', async () => {
-    await assertMissingAuthority(shared.infl.migrate({ from: unauthorized }));
-  });
-
-  it('should copy federation defaults without mutating existing state', async () => {
-    const stateBefore = await shared.infl.stateTable();
-    const reserveBefore = await shared.infl.reserveTable();
-    const payoutsBefore = await shared.infl.payoutsTable();
-    const dacBefore = await shared.infl.dacpayoutsTable();
-
-    await shared.infl.migrate();
-
-    const stateAfter = await shared.infl.stateTable();
-    const reserveAfter = await shared.infl.reserveTable();
-    const payoutsAfter = await shared.infl.payoutsTable();
-    const dacAfter = await shared.infl.dacpayoutsTable();
-
-    if (stateBefore.rows.length) {
-      chai.expect(stateAfter.rows).to.deep.equal(stateBefore.rows);
-    } else {
-      chai.expect(stateAfter.rows.length).to.be.at.least(1);
-      const afterState = stateAfter.rows[0];
-      chai.expect(afterState.total_stake).to.equal(0);
-      chai.expect(afterState.nft_total).to.equal(0);
-    }
-
-    if (reserveBefore.rows.length) {
-      chai.expect(reserveAfter.rows).to.deep.equal(reserveBefore.rows);
-    } else {
-      chai.expect(reserveAfter.rows.length).to.be.at.least(1);
-      chai.expect(reserveAfter.rows[0].total).to.equal(0);
-    }
-    chai.expect(payoutsAfter.rows).to.deep.equal(payoutsBefore.rows);
-    chai.expect(dacAfter.rows).to.deep.equal(dacBefore.rows);
-  });
-
-  it('should fail when migrate is called twice', async () => {
-    await assertEOSErrorIncludesMessage(
-      shared.infl.migrate(),
-      'Already migrated'
-    );
-  });
-});
 
 describe('Infl inflate preconditions', () => {
   before(async () => {

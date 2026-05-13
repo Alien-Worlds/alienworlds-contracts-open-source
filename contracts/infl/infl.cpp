@@ -6,48 +6,6 @@ using namespace atomicdata;
 
 infl::infl(name s, name code, datastream<const char *> ds) : contract(s, code, ds) {}
 
-void infl::migrate() {
-    require_auth(get_self());
-
-    auto mig = migration_singleton{get_self(), get_self().value};
-    auto ms  = mig.get_or_default(migration_state{});
-    check(!ms.completed, "Already migrated");
-
-    // copy state
-    auto fed_state         = state_item::get_current_state("federation"_n, "federation"_n);
-    auto infl_state        = state_item::get_current_state(get_self(), get_self());
-    infl_state             = fed_state;
-    infl_state.total_stake = 0; // reset total stake, it is no longer used by runtime logic and is calculated on the fly from planets each time.
-    infl_state.save(get_self(), get_self(), get_self());
-
-    // copy reserve
-    auto fed_reserve  = reserve_item::get_current_reserve("federation"_n, "federation"_n);
-    auto infl_reserve = reserve_item::get_current_reserve(get_self(), get_self());
-    infl_reserve      = fed_reserve;
-    infl_reserve.save(get_self(), get_self(), get_self());
-
-    // copy payouts
-    payouts_table fed_payouts{"federation"_n, "federation"_n.value};
-    payouts_table infl_payouts{get_self(), get_self().value};
-    for (const auto &p : fed_payouts) {
-        infl_payouts.emplace(get_self(), [&](auto &np) {
-            np = p;
-        });
-    }
-
-    // copy dac_payouts
-    dac_payouts_table fed_dac{"federation"_n, "federation"_n.value};
-    dac_payouts_table infl_dac{get_self(), get_self().value};
-    for (const auto &d : fed_dac) {
-        infl_dac.emplace(get_self(), [&](auto &nd) {
-            nd = d;
-        });
-    }
-
-    ms.completed = true;
-    mig.set(ms, get_self());
-}
-
 void infl::inflate() {
     check_not_paused();
 

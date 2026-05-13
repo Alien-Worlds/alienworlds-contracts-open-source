@@ -22,11 +22,6 @@ using namespace std;
 namespace alienworlds {
 
     class [[eosio::contract("infl")]] infl : public contract {
-#ifdef IS_DEV
-      public:
-#else
-      private:
-#endif
 
       private:
         static constexpr auto binance_name = "bina.world"_n;
@@ -69,11 +64,6 @@ namespace alienworlds {
                 reserve_singleton(account, scope.value).set(*this, payer);
             }
         };
-
-        struct [[eosio::table("migration")]] migration_state {
-            bool completed = false;
-        };
-        using migration_singleton = eosio::singleton<"migration"_n, migration_state>;
 
         // Pausable control (mirrors tlm.token)
         TABLE pausable {
@@ -139,8 +129,6 @@ namespace alienworlds {
         using contract::contract;
 
         infl(name s, name code, datastream<const char *> ds);
-
-        ACTION migrate();
 
         ACTION inflate();
 
