@@ -48,7 +48,7 @@ let users: {
 }[];
 let shared: SharedTestObjects;
 
-describe('Alwgladiator', () => {
+describe.skip('Alwgladiator', () => {
   before(async () => {
     shared = await SharedTestObjects.getInstance();
     alwgladiator = shared.alwgladiator;

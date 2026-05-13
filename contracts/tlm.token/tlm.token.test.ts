@@ -307,45 +307,4 @@ describe('tlm.token', () => {
       });
     });
   });
-
-  context('chngissuer action', async () => {
-    it('with wrong permissions should raise auth error', async () => {
-      const anybody = await l.AccountManager.createAccount();
-      await l.assertMissingAuthority(
-        tokenContract.chngissuer({ from: anybody })
-      );
-    });
-
-    it('fails when TLM does not exist', async () => {
-      const altToken = await l.ContractDeployer.deployWithName<TlmToken>(
-        'tlm.token',
-        'alt.token'
-      );
-      await l.assertEOSErrorIncludesMessage(
-        altToken.chngissuer({ from: altToken.account }),
-        'ERR::CHNGISSUER_NON_EXISTING_SYMBOL'
-      );
-    });
-
-    it('changes issuer to inflt.worlds once TLM exists', async () => {
-      const alt2Token = await l.ContractDeployer.deployWithName<TlmToken>(
-        'tlm.token',
-        'alt2.token'
-      );
-      await alt2Token.create(issuer.name, '1000.0000 TLM' as any, {
-        from: alt2Token.account,
-      });
-      await alt2Token.chngissuer({ from: alt2Token.account });
-      const stats = await alt2Token.statTable({ scope: 'TLM' });
-      expect(stats.rows[0].issuer).to.equal('inflt.worlds');
-    });
-
-    it('fails if already set', async () => {
-      await l.sleep(3000); // Prevent duplicate transaction error
-      await l.assertEOSErrorIncludesMessage(
-        tokenContract.chngissuer(),
-        'ERR::CHNGISSUER_ALREADY_SET'
-      );
-    });
-  });
 });

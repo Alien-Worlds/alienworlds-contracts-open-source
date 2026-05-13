@@ -117,7 +117,6 @@ namespace eosio {
 
         ACTION pause();
         ACTION unpause();
-        ACTION chngissuer();
 
         using create_action = eosio::action_wrapper<"create"_n, &token::create>;
         using issue_action  = eosio::action_wrapper<"issue"_n, &token::issue>;
