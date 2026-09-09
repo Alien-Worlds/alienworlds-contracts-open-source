@@ -5,7 +5,7 @@
     "csv-parser": "^2.3.2",
     "eosjs": "^20.0.3",
     "int64-buffer": "^0.99.1007",
-    "node-fetch": "^2.6.7",
+    "node-fetch": "^3.3.2",
     "text-encoding": "^0.7.0"
   }
 }
