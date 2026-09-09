@@ -42,14 +42,32 @@ describe('Pointsproxy', () => {
     points_manager1 = await AccountManager.createAccount('manager1');
     points_manager2 = await AccountManager.createAccount('manager2');
 
+    // This permission is shared chain state: TestHelpers sets it to the mining
+    // contract's code authority (mining is deployed to 'm.federation'), and the
+    // mining suite needs it to stay that way. Replacing it with pointsproxy
+    // alone broke whichever of the two suites ran second, depending on the
+    // order mocha globbed the test files in. Grant both, as competitions does.
     await UpdateAuth.execUpdateAuth(
       shared.userpoints.account.active,
       shared.userpoints.name,
       'usrpoints',
       'active',
-      UpdateAuth.AuthorityToSet.forContractCode(
-        shared.pointsproxy_contract.account
-      )
+      UpdateAuth.AuthorityToSet.explicitAuthorities(1, [
+        {
+          permission: {
+            actor: shared.mining.account.name,
+            permission: 'eosio.code',
+          },
+          weight: 1,
+        },
+        {
+          permission: {
+            actor: shared.pointsproxy_contract.account.name,
+            permission: 'eosio.code',
+          },
+          weight: 1,
+        },
+      ])
     );
     await shared.acceptTerms(user1);
     await shared.acceptTerms(user2);
