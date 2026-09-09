@@ -8,11 +8,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "typescript": "^3.8.3"
+    "typescript": "^7.0.2"
   },
   "dependencies": {
-    "@types/chai-as-promised": "^7.1.2",
+    "@types/chai-as-promised": "^8.0.2",
     "atomicassets": "^1.0.2",
-    "chai-as-promised": "^7.1.1"
+    "chai-as-promised": "^8.0.2"
   }
 }
