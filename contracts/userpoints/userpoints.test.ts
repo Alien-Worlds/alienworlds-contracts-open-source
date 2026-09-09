@@ -1838,7 +1838,12 @@ describe('Userpoints', async () => {
     context('when user points record does not exist', async () => {
       let nonExistentUser: Account;
       before(async () => {
-        nonExistentUser = await AccountManager.createAccount('nonexistent');
+        // Must not be named 'nonexistent': this creates a real account on the
+        // shared chain, and schedulepay, mining, competitions and staking all
+        // assert that that exact name does NOT exist. Whichever suite runs
+        // second used to fail, depending on the order mocha happened to glob
+        // the test files in.
+        nonExistentUser = await AccountManager.createAccount('nopointsuser');
         // Do not call openUser for nonExistentUser
       });
       it('should fail', async () => {
