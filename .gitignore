@@ -62,3 +62,7 @@ alienworlds-contracts-private/
 
 # npm lockfile — this project uses yarn (see packageManager)
 package-lock.json
+
+# Local obfuscation secret — never commit
+.magic_key_value
+**/.magic_key_value
