@@ -37,9 +37,16 @@
     "clang-format": "1.7.0",
     "dayjs": "^1.11.1",
     "int64-buffer": "^1.0.0",
-    "lamington": "https://github.com/Alien-Worlds/lamington.git",
+    "lamington": "https://github.com/Alien-Worlds/lamington.git#v1.5.0",
     "mathjs": "^9.3.0",
     "prettier": "2.7.1"
+  },
+  "resolutions": {
+    "@babel/runtime": "7.26.10",
+    "base-x": "3.0.11",
+    "cipher-base": "1.0.7",
+    "elliptic": "6.6.1",
+    "sha.js": "2.4.12"
   },
   "lint-staged": {
     "**/*.{cpp,cxx,cc,hpp,hxx,hh}": [
