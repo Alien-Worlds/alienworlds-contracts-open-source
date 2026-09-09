@@ -555,6 +555,7 @@ describe('NFTMintctl', () => {
       it('should have transferred the asset', async () => {
         const res = await shared.atomicassets.assetsTable({
           scope: shared.atomicmarket.name,
+          limit: 1000,
         });
         asset = res.rows.find((row) => row.template_id === TEMPLATE_ID);
         chai.expect(asset).not.to.be.undefined;

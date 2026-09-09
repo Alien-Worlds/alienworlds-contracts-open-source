@@ -100,7 +100,10 @@ describe('Federation', async () => {
             { from: shared.eosioToken.account }
           );
           asset = (
-            await shared.atomicassets.assetsTable({ scope: user.name })
+            await shared.atomicassets.assetsTable({
+              scope: user.name,
+              limit: 1000,
+            })
           ).rows.find((x) => x.template_id === shared.ALIEN_AVATAR_TEMPLATE_ID);
         });
 
@@ -132,10 +135,14 @@ describe('Federation', async () => {
         it('should have minted avatar', async () => {
           const res = await shared.atomicassets.assetsTable({
             scope: user2.name,
+            limit: 1000,
           });
 
           const asset = (
-            await shared.atomicassets.assetsTable({ scope: user2.name })
+            await shared.atomicassets.assetsTable({
+              scope: user2.name,
+              limit: 1000,
+            })
           ).rows.find((x) => x.template_id === shared.MALE_AVATAR_TEMPLATE_ID);
           chai.expect(asset).to.not.equal(undefined);
         });
@@ -216,7 +223,10 @@ describe('Federation', async () => {
           );
 
           asset = (
-            await shared.atomicassets.assetsTable({ scope: user.name })
+            await shared.atomicassets.assetsTable({
+              scope: user.name,
+              limit: 1000,
+            })
           ).rows.find((x) => x.template_id === template_id);
         });
 
@@ -292,7 +302,10 @@ describe('Federation', async () => {
         );
 
         asset = (
-          await shared.atomicassets.assetsTable({ scope: user.name })
+          await shared.atomicassets.assetsTable({
+            scope: user.name,
+            limit: 1000,
+          })
         ).rows.find((x) => x.template_id === template_id);
       });
 
@@ -390,7 +403,10 @@ describe('Federation', async () => {
         );
 
         asset = (
-          await shared.atomicassets.assetsTable({ scope: user.name })
+          await shared.atomicassets.assetsTable({
+            scope: user.name,
+            limit: 1000,
+          })
         ).rows.find((x) => x.template_id === template_id);
       });
 

@@ -1657,6 +1657,7 @@ describe('Userpoints', async () => {
         it('should have transferred the NFT to the user', async () => {
           const res = await shared.atomicassets.assetsTable({
             scope: nftowner1.name,
+            limit: 1000,
           });
           const found_asset = res.rows.find((x) => x.asset_id === asset_id1);
           chai.expect(found_asset).to.not.be.undefined;
