@@ -41,15 +41,20 @@ const uint32_t SECONDS_PER_WEEK = 7 * 24 * 60 * 60;
 // mainnet
 #define DAC_TOKEN_CONTRACT_STR "token.worlds"
 static constexpr name DAC_TOKEN_CONTRACT{DAC_TOKEN_CONTRACT_STR};
+// The IS_DEV ids below are positional: atomicassets assigns template ids in
+// creation order, and SharedTestObjects.setupNFTs creates them as
+// 1 shovel, 2 drill, 3 male avatar, 4 female avatar, 5 alien avatar.
+// Adding or removing a template creation before these shifts every later id,
+// so keep this block and that fixture in step.
 #ifdef IS_DEV
-#define FREE_TOOL_ID 2
+#define FREE_TOOL_ID 1
 #else
 #define FREE_TOOL_ID 19552
 #endif
 
 #ifdef IS_DEV
-#define MALE_AVATAR_TEMPLATE 4
-#define FEMALE_AVATAR_TEMPLATE 5
+#define MALE_AVATAR_TEMPLATE 3
+#define FEMALE_AVATAR_TEMPLATE 4
 #else
 #define MALE_AVATAR_TEMPLATE 19649
 #define FEMALE_AVATAR_TEMPLATE 19648
