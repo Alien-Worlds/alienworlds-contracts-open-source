@@ -18,7 +18,7 @@ These smart contracts form the backbone of various game mechanics including mini
 - **Planetary Governance**: DAO structure for planet management
 - **Token System**: TLM token management and distribution
 - **Staking Mechanics**: Token staking and rewards
-- **Game Features**: Competitions, gladiator battles, and more
+- **Game Features**: Competitions, events, and more
 
 ## System Architecture
 
@@ -97,7 +97,6 @@ The architecture illustrates the following key components and their interactions
 ### Game Features
 
 - **Competitions**: Tournament and event management
-- **Gladiator System**: Combat mechanics
 - **Staking**: Token staking and rewards
 
 ### Land System
@@ -210,13 +209,6 @@ The Alien Worlds ecosystem is built on a sophisticated network of interconnected
   - Competition creation and management
   - Reward distribution
   - Leaderboard tracking
-
-#### Gladiator Contract (`alwgladiator/`, account: `f.federation`)
-
-- **Purpose**: Combat and event mechanics
-- **Features**:
-  - Battle flows and rewards
-  - Administration actions for events
 
 #### Tokelore (`tokelore/`)
 

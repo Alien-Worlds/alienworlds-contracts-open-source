@@ -5,7 +5,6 @@
 #include <eosio/time.hpp>
 #include <eosio/crypto.hpp>
 #include <eosio/transaction.hpp>
-// #include <atomicassets.hpp>
 #include <atomicassets-interface.hpp>
 #include <atomicdata.hpp>
 #include "randomness_provider.cpp"
