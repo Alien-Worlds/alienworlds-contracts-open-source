@@ -1419,9 +1419,9 @@ keyv@^4.0.0:
   dependencies:
     json-buffer "3.0.1"
 
-"lamington@https://github.com/Alien-Worlds/lamington.git#v1.5.0":
+"lamington@https://github.com/Alien-Worlds/lamington.git#ad330a7fce9949d1c5922ff60a2a32fb1ec4bb97":
   version "1.5.0"
-  resolved "https://github.com/Alien-Worlds/lamington.git#be70d04eb9ab91b94775bf015871802ab88ebd5e"
+  resolved "https://github.com/Alien-Worlds/lamington.git#ad330a7fce9949d1c5922ff60a2a32fb1ec4bb97"
   dependencies:
     "@types/chai-as-promised" "^7.1.3"
     "@types/elliptic" "^6.4.12"

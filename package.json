@@ -37,7 +37,7 @@
     "clang-format": "1.7.0",
     "dayjs": "^1.11.1",
     "int64-buffer": "^1.0.0",
-    "lamington": "https://github.com/Alien-Worlds/lamington.git#v1.5.0",
+    "lamington": "https://github.com/Alien-Worlds/lamington.git#ad330a7fce9949d1c5922ff60a2a32fb1ec4bb97",
     "mathjs": "^9.3.0",
     "prettier": "2.7.1"
   },
