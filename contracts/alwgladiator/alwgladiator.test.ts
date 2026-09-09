@@ -1104,7 +1104,7 @@ async function mintAvatar(user: Account, newAvatar: minion) {
   );
 
   let user_object = users.find((x) => x.account.name == user.name);
-  const res = await atomicassets.assetsTable({ scope: user.name });
+  const res = await atomicassets.assetsTable({ scope: user.name, limit: 1000 });
   const nft = res.rows.find((x) => x.schema_name == shared.MINION_SCHEMA);
   user_object.minion.id = nft.asset_id;
 }
@@ -1132,7 +1132,7 @@ async function mintWeapon(user: Account, newWeapon: weapon) {
 
 async function updateWeapons(user: Account) {
   let user_object = users.find((x) => x.account.name == user.name);
-  const res = await atomicassets.assetsTable({ scope: user.name });
+  const res = await atomicassets.assetsTable({ scope: user.name, limit: 1000 });
   const nfts = res.rows.filter((x) => x.schema_name == shared.WEAPON_SCHEMA);
   let i = 0;
   for (const nft of nfts) {

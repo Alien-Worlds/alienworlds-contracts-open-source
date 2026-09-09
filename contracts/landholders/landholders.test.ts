@@ -1497,11 +1497,17 @@ describe('LandHolders', () => {
       await shared.mintSuperboost(super_owner);
 
       megaboost_asset = (
-        await shared.atomicassets.assetsTable({ scope: mega_owner.name })
+        await shared.atomicassets.assetsTable({
+          scope: mega_owner.name,
+          limit: 1000,
+        })
       ).rows.find((x) => x.template_id === shared.MEGABOOST_TEMPLATE_ID);
       console.log('megaboost_asset: ', JSON.stringify(megaboost_asset));
       superboost_asset = (
-        await shared.atomicassets.assetsTable({ scope: super_owner.name })
+        await shared.atomicassets.assetsTable({
+          scope: super_owner.name,
+          limit: 1000,
+        })
       ).rows.find((x) => x.template_id === shared.SUPERBOOST_TEMPLATE_ID);
 
       await landholders.setconfig2(
@@ -1572,6 +1578,7 @@ describe('LandHolders', () => {
         it('should burn the megaboost NFT', async () => {
           const res = await shared.atomicassets.assetsTable({
             scope: landholders.account.name,
+            limit: 1000,
           });
           console.log('assetsTable: ', JSON.stringify(res, null, 2));
           chai.expect(
@@ -1633,6 +1640,7 @@ describe('LandHolders', () => {
         it('should burn the superboost NFT', async () => {
           const res = await shared.atomicassets.assetsTable({
             scope: landholders.account.name,
+            limit: 1000,
           });
           chai.expect(
             res.rows.find((x) => x.asset_id === superboost_asset.asset_id)
@@ -1686,7 +1694,10 @@ describe('LandHolders', () => {
         somebody = await AccountManager.createAccount();
         await shared.mintMegaboost(withdrawer);
         megaboost_asset = (
-          await shared.atomicassets.assetsTable({ scope: withdrawer.name })
+          await shared.atomicassets.assetsTable({
+            scope: withdrawer.name,
+            limit: 1000,
+          })
         ).rows.find((x) => x.template_id === shared.MEGABOOST_TEMPLATE_ID);
       });
       context('with owner auth and nothing deposited', async () => {
@@ -1732,6 +1743,7 @@ describe('LandHolders', () => {
         it('should transfer the NFT to the owner', async () => {
           const res = await shared.atomicassets.assetsTable({
             scope: withdrawer.name,
+            limit: 1000,
           });
           chai.expect(
             res.rows.find((x) => x.asset_id === megaboost_asset.asset_id)

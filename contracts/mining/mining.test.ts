@@ -192,6 +192,7 @@ describe('Mining', () => {
       landowner = shared.landowners[1];
       const res = await atomicassets.assetsTable({
         scope: landowner.name,
+        limit: 1000,
       });
       land_asset = res.rows.find((x) => x.schema_name == shared.LAND_SCHEMA);
     });
@@ -239,6 +240,7 @@ describe('Mining', () => {
       it('when land is different should work', async () => {
         const res = await atomicassets.assetsTable({
           scope: landowner.name,
+          limit: 1000,
         });
         land_asset_2 = res.rows.filter(
           (x) => x.schema_name == shared.LAND_SCHEMA
@@ -279,6 +281,7 @@ describe('Mining', () => {
       landowner = shared.landowners[1];
       const res = await atomicassets.assetsTable({
         scope: landowner.name,
+        limit: 1000,
       });
       land_asset = res.rows.find((x) => x.schema_name == shared.LAND_SCHEMA);
     });
@@ -580,6 +583,7 @@ describe('Mining', () => {
       before(async () => {
         const res = await atomicassets.assetsTable({
           scope: miner1.name,
+          limit: 1000,
         });
         const tool = res.rows.find((x) => x.schema_name == shared.TOOL_SCHEMA);
 
@@ -684,7 +688,10 @@ describe('Mining', () => {
               miner1_initial_balance = await shared.getBalance(miner1);
               landowner_initial_balance = await shared.getBalance(landowner);
 
-              let res = await mining.minersTable({ scope: mining.name });
+              let res = await mining.minersTable({
+                scope: mining.name,
+                limit: 1000,
+              });
               miner_state_before = res.rows.find((x) => x.miner == miner1.name);
 
               // set land commission to 25%
@@ -746,7 +753,10 @@ describe('Mining', () => {
               }
             });
             it('should update miner state', async () => {
-              const res = await mining.minersTable({ scope: mining.name });
+              const res = await mining.minersTable({
+                scope: mining.name,
+                limit: 1000,
+              });
               const miner_state_after = res.rows.find(
                 (x) => x.miner == miner1.name
               );
@@ -775,10 +785,14 @@ describe('Mining', () => {
               );
             });
             it('should update tooluse', async () => {
-              const res = await mining.bagsTable({ scope: mining.name });
+              const res = await mining.bagsTable({
+                scope: mining.name,
+                limit: 1000,
+              });
               const bag = res.rows.find((x) => x.account == miner1.name);
               const tool_res = await mining.tooluseTable({
                 scope: mining.name,
+                limit: 1000,
               });
               for (const id of bag.items) {
                 const tooluse_entry = tool_res.rows.find(
@@ -832,8 +846,13 @@ describe('Mining', () => {
               chai.expect(Math.abs(deviation)).to.be.below(0.065);
             });
             it('should not add userpoints', async () => {
+              // Bound the query to this miner. get_table_rows returns only 10
+              // rows when no limit is given, so an unbounded read asserts
+              // emptiness against whatever happens to be in the first page.
               const res = await shared.userpoints.userpointsTable({
                 scope: shared.userpoints.name,
+                lowerBound: miner1.name,
+                upperBound: miner1.name,
               });
               const our_userpoints = res.rows.filter(
                 (x) => x.user == miner1.name
@@ -865,6 +884,7 @@ describe('Mining', () => {
           await shared.userpoints.reguser(miner1.name, { from: miner1 });
           const res = await atomicassets.assetsTable({
             scope: miner1.name,
+            limit: 1000,
           });
           const shovels = res.rows
             .filter((x) => x.template_id == shared.SHOVEL_TEMPLATE_ID)
@@ -892,8 +912,13 @@ describe('Mining', () => {
             landowner,
             land_asset
           );
+          // Bound the query to this miner. get_table_rows defaults to 10 rows,
+          // so once other suites have seeded the table this row falls outside
+          // the first page and the find below returns undefined.
           const res = await shared.userpoints.userpointsTable({
             scope: shared.userpoints.name,
+            lowerBound: miner1.name,
+            upperBound: miner1.name,
           });
           const x = res.rows.find((y) => y.user == miner1.name);
           chai.expect(x).not.to.be.undefined;
@@ -943,6 +968,7 @@ describe('Mining', () => {
           landowner = shared.landowners[1];
           const res = await atomicassets.assetsTable({
             scope: landowner.name,
+            limit: 1000,
           });
           land_asset = res.rows.find(
             (x) => x.schema_name == shared.LAND_SCHEMA
@@ -1306,6 +1332,7 @@ describe('Mining', () => {
         landowner = shared.landowners[0];
         const res = await atomicassets.assetsTable({
           scope: landowner.name,
+          limit: 1000,
         });
         landAsset = res.rows.find((x) => x.schema_name == shared.LAND_SCHEMA);
 
@@ -1439,6 +1466,7 @@ describe('Mining', () => {
         landowner = shared.landowners[0];
         const res = await atomicassets.assetsTable({
           scope: landowner.name,
+          limit: 1000,
         });
         landAsset = res.rows.find((x) => x.schema_name == shared.LAND_SCHEMA);
 
@@ -1696,14 +1724,20 @@ describe('Mining', () => {
           await setupMiner(miner, land);
 
           // Bucket amount before mining
-          const conf_before = await mining.pltdtapconfTable({ scope: planet });
+          const conf_before = await mining.pltdtapconfTable({
+            scope: planet,
+            limit: 1000,
+          });
           const bucket_before_variant = conf_before.rows[0].data.find(
             (x) => x.key === 'claim_bucket'
           );
           const bucket_before_asset = new Asset(bucket_before_variant.value[1]);
 
           // Snapshot state immediately before mining
-          const state_before_res = await mining.state3Table({ scope: planet });
+          const state_before_res = await mining.state3Table({
+            scope: planet,
+            limit: 1000,
+          });
           const state_before = state_before_res.rows[0];
           const new_to_mine_bucket =
             calculate_mine_bucket_allocation(state_before);
@@ -1712,7 +1746,10 @@ describe('Mining', () => {
           await mining.mine(miner.name, nonce, undefined, { from: miner });
 
           // Fetch the planet dtap config and verify the claim bucket
-          const conf_res = await mining.pltdtapconfTable({ scope: planet });
+          const conf_res = await mining.pltdtapconfTable({
+            scope: planet,
+            limit: 1000,
+          });
           const conf_data_list = conf_res.rows[0].data;
           const claim_bucket_variant = conf_data_list.find(
             (x) => x.key === 'claim_bucket'
@@ -1802,6 +1839,7 @@ describe('Mining', () => {
       it('should transfer the planet claim bucket to the configured destination', async () => {
         const conf_before = await mining.pltdtapconfTable({
           scope: shared.testplanet,
+          limit: 1000,
         });
         const claim_bucket_variant = conf_before.rows[0].data.find(
           (d) => d.key === 'claim_bucket'
@@ -1837,6 +1875,7 @@ describe('Mining', () => {
 async function get_land(landowner) {
   const res = await atomicassets.assetsTable({
     scope: landowner.name,
+    limit: 1000,
   });
   const lands = res.rows.filter((x) => x.schema_name == shared.LAND_SCHEMA);
 
@@ -1886,7 +1925,8 @@ function zip(a, b) {
 }
 
 async function get_miner_luck(miner, landowner, land) {
-  const all_bags = (await mining.bagsTable({ scope: mining.name })).rows;
+  const all_bags = (await mining.bagsTable({ scope: mining.name, limit: 1000 }))
+    .rows;
   const bag = all_bags.find((x) => x.account == miner.name);
   chai.expect(bag).not.to.be.undefined;
   const luck = await Promise.all(
@@ -1914,7 +1954,8 @@ function sum(list) {
 }
 
 async function get_miner_ease(miner, land_data) {
-  const all_bags = (await mining.bagsTable({ scope: mining.name })).rows;
+  const all_bags = (await mining.bagsTable({ scope: mining.name, limit: 1000 }))
+    .rows;
   const bag = all_bags.find((x) => x.account == miner.name);
   chai.expect(bag).not.to.be.undefined;
   const eases = await Promise.all(
