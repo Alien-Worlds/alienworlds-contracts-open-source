@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Build contracts and run tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --non-interactive --network-concurrency 1
+
+      # Fails in seconds if the toolchain cannot even load, rather than as a
+      # confusing error inside the first test.
+      - name: Verify the test runner loads
+        run: yarn lamington --version
+
+      # eosio-cpp runs as root in the container and would otherwise create these
+      # directories root-owned, so Lamington cannot write its .mod.json stamp.
+      # Invisible on macOS, where Docker Desktop maps ownership.
+      - name: Pre-create the contract output directories
+        run: |
+          node -e '
+            const { include } = JSON.parse(require("fs").readFileSync(".lamingtonrc"));
+            include.forEach((f) => process.stdout.write(f.replace(/\.cpp$/, "") + "\n"));
+          ' | while read -r name; do
+            mkdir -p "artifacts/compiled_contracts/IS_DEV/$name"
+          done
+
+      - name: Build contracts and run the full suite
+        run: yarn test
+
+      - name: Upload the chain and test logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs
+          path: .lamington/
+          retention-days: 7
+          if-no-files-found: ignore

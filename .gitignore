@@ -42,7 +42,6 @@ contracts/landholders/scripts/dist
 /contracts/dacdirectory/dacdirectory.ts
 /contracts/eosdactokens/eosdactokens.ts
 /contracts/notify/notify.ts
-/yarn.lock
 /contracts/pointsproxy/pointsproxy.ts
 /contracts/nftmintctl/nftmintctl.ts
 /contracts/testmarket/testmarket.ts
@@ -60,3 +59,6 @@ contracts/infl/infl.ts
 /contracts/alienworlds-contracts-private
 alienworlds-contracts-private/
 .codegraph/
+
+# npm lockfile — this project uses yarn (see packageManager)
+package-lock.json
