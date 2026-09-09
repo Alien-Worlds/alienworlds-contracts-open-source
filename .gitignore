@@ -25,7 +25,6 @@ scripts/landowners.json
 /artifacts/compiled_contracts/contracts/atomicassets-contracts/src/*
 !/artifacts/compiled_contracts/contracts/atomicassets-contracts/src/atomicassets.abi
 !/artifacts/compiled_contracts/contracts/atomicassets-contracts/src/atomicassets.wasm
-/contracts/alwgladiator/alwgladiator.ts
 /contracts/tlm.token/tlm.token.ts
 /contracts/federation/federation.ts
 /contracts/landholders/landholders.ts

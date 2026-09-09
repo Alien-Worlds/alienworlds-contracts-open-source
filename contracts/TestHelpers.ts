@@ -21,7 +21,6 @@ const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
 
-import { Alwgladiator } from './alwgladiator/alwgladiator';
 import { Federation } from './federation/federation';
 import { Infl } from './infl/infl';
 import { Landholders } from './landholders/landholders';
@@ -48,7 +47,6 @@ export class SharedTestObjects {
   // Shared Instances to use between tests.
   private static instance: SharedTestObjects;
 
-  alwgladiator: Alwgladiator;
   federation: Federation;
   infl: Infl;
   userpoints: Userpoints;
@@ -81,9 +79,7 @@ export class SharedTestObjects {
   BUDGET_SCHEMA: string;
   TOOL_SCHEMA: string;
   LAND_SCHEMA: string;
-  MINION_SCHEMA: string;
   AVATAR_SCHEMA: string;
-  WEAPON_SCHEMA: string;
   LAND_TEMPLATE_ID: Number;
   SHOVEL_TEMPLATE_ID: Number;
   DRILL_TEMPLATE_ID: Number;
@@ -102,9 +98,7 @@ export class SharedTestObjects {
     this.BUDGET_SCHEMA = 'budget';
     this.TOOL_SCHEMA = 'tool.worlds';
     this.LAND_SCHEMA = 'land.worlds';
-    this.MINION_SCHEMA = 'alwminschme';
     this.AVATAR_SCHEMA = 'faces.worlds';
-    this.WEAPON_SCHEMA = 'arms.worlds';
     this.BOOST_SCHEMA = 'boost.worlds';
     this.testplanet = 'eyeke.world';
     this.landowners = [];
@@ -123,10 +117,6 @@ export class SharedTestObjects {
   private async initAndGetSharedObjects() {
     console.log('Waiting for system contract to be deployed...');
     await this.waitForSystemContract();
-    this.alwgladiator = await ContractDeployer.deployWithName<Alwgladiator>(
-      'alwgladiator',
-      'alwgladiator'
-    );
     this.landholders = await ContractDeployer.deployWithName<Landholders>(
       'landholders',
       'awlndratings'
@@ -569,18 +559,13 @@ export class SharedTestObjects {
       true,
       [
         this.eosioToken.account.name,
-        this.alwgladiator.account.name,
         this.federation.account.name,
         this.landholders.account.name,
         this.mining.account.name,
         this.tokeLore.account.name,
         this.mint_helper_account.name,
       ],
-      [
-        this.alwgladiator.account.name,
-        this.federation.account.name,
-        this.landholders.account.name,
-      ],
+      [this.federation.account.name, this.landholders.account.name],
       '0.01',
       '',
       { from: this.eosioToken.account }
@@ -591,44 +576,18 @@ export class SharedTestObjects {
     // await this.mintBudgetNFT(500);
     // await this.mintBudgetNFT(300);
     await this.createToolSchema();
-    await this.setupAwlgladiatorNFTs();
+    await this.createAvatarSchema();
     await this.createShovelTemplate();
     await this.createDrillTemplate();
 
     await this.createAvatarTemplates();
   }
 
-  async setupAwlgladiatorNFTs() {
-    await this.atomicassets.createschema(
-      this.eosioToken.account.name,
-      this.NFT_COLLECTION,
-      this.MINION_SCHEMA,
-      [
-        { name: 'name', type: 'string' },
-        { name: 'type', type: 'uint8' },
-        { name: 'race', type: 'uint8' },
-        { name: 'attack', type: 'uint8' },
-        { name: 'defence', type: 'uint8' },
-        { name: 'movecost', type: 'uint8' },
-        { name: 'nummatches', type: 'uint32' },
-        { name: 'numwins', type: 'uint32' },
-      ],
-      { from: this.eosioToken.account }
-    );
-
-    await this.atomicassets.createschema(
-      this.eosioToken.account.name,
-      this.NFT_COLLECTION,
-      this.WEAPON_SCHEMA,
-      [
-        { name: 'name', type: 'string' },
-        { name: 'type', type: 'uint8' },
-        { name: 'attack', type: 'uint8' },
-        { name: 'defence', type: 'uint8' },
-      ],
-      { from: this.eosioToken.account }
-    );
-
+  // The avatar schema is created here because createAvatarTemplates() below
+  // depends on it, and the federation suite mints avatars. The minion and
+  // weapon schemas that used to be created alongside it belonged to the
+  // removed alwgladiator contract and had no other consumer.
+  async createAvatarSchema() {
     await this.atomicassets.createschema(
       this.eosioToken.account.name,
       this.NFT_COLLECTION,
@@ -637,17 +596,6 @@ export class SharedTestObjects {
         { name: 'cardid', type: 'uint16' },
         { name: 'name', type: 'string' },
       ],
-      { from: this.eosioToken.account }
-    );
-
-    await this.atomicassets.createtempl(
-      this.eosioToken.account.name,
-      this.NFT_COLLECTION,
-      this.MINION_SCHEMA,
-      true,
-      true,
-      100,
-      '',
       { from: this.eosioToken.account }
     );
   }

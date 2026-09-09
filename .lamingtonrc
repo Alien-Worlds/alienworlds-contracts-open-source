@@ -18,7 +18,6 @@
   ],
   "benchmark": false,
   "include": [
-    "alwgladiator.cpp",
     "daccustodian.cpp",
     "tlm.token.cpp",
     "federation.cpp",

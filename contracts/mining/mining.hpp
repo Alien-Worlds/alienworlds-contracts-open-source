@@ -4,11 +4,9 @@
 #include <eosio/singleton.hpp>
 #include <eosio/time.hpp>
 #include <eosio/transaction.hpp>
-// #include <atomicassets.hpp>
 #include <atomicassets-interface.hpp>
 #include <atomicdata.hpp>
 #include <cmath>
-#include "randomness_provider.cpp"
 #include <eosio/binary_extension.hpp>
 
 using namespace eosio;

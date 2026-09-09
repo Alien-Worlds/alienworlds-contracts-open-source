@@ -1,0 +1,51 @@
+# Dependabot had no configuration, so it was scanning every lockfile in the
+# repository on default settings. That produced a large number of alerts it
+# could not act on, and a security-update job that failed on every schedule.
+#
+# Two things to know when reading the alert list:
+#
+#   - Nothing in the npm graph ships on chain. The contracts are C++ compiled
+#     to WASM; npm covers only the build and test tooling. Dependabot reports
+#     almost everything as `runtime` scope, which is an artifact of reading a
+#     lockfile with no package.json beside it to declare devDependencies.
+#   - Alerts against the root lockfile are almost all transitive through the
+#     `lamington` git dependency. Dependabot cannot bump a transitive
+#     dependency of a git-sourced package, so those jobs fail with
+#     `conflicting-dependencies` no matter how often they run. Clearing them
+#     means moving the lamington ref itself, or adding `resolutions` overrides.
+version: 2
+updates:
+  # Only the directories that actually contain a package.json. Bare lockfiles
+  # with no manifest were removed; Dependabot cannot resolve an update without
+  # a manifest to write the new range into.
+  - package-ecosystem: npm
+    directories:
+      - /
+      - /contracts/federation/planet_claim
+      - /contracts/federation/setup
+      - /contracts/packopener/setup
+      - /contracts/shining/setup
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # One PR per run rather than a drip of individual bumps. Grouping applies
+      # to security updates too, which is where the churn came from.
+      npm-version-updates:
+        applies-to: version-updates
+        patterns:
+          - '*'
+      npm-security-updates:
+        applies-to: security-updates
+        patterns:
+          - '*'
+
+  # Keep the CI workflow actions current now that the repo has workflows.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      github-actions:
+        patterns:
+          - '*'
