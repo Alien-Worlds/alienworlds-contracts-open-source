@@ -41,13 +41,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "eosio-helpers": "^0.1.15",
+    "eosio-helpers": "^7.1.0",
     "eosjs": "^22.0.0",
-    "node-fetch": "2.6",
-    "sha256-uint8array": "^0.10.1",
+    "node-fetch": "3.3",
+    "sha256-uint8array": "^0.12.1",
     "tsc": "^2.0.3"
   },
   "devDependencies": {
-    "typescript": "^4.5.4"
+    "typescript": "^7.0.2"
   }
 }
