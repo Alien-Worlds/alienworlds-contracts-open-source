@@ -18,13 +18,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
+          # setup-node v5 and later enable dependency caching by default whenever
+          # package.json has a packageManager field, which this one does. Turning
+          # the cache on is a reasonable thing to want, but it should be its own
+          # change with its own green run behind it, not something inherited as a
+          # side effect of a version bump - yarn v1 has a cache race that produced
+          # exactly the install failures --network-concurrency 1 below works
+          # around, and that is not a debugging session to re-enter by accident.
+          package-manager-cache: false
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile --non-interactive --network-concurrency 1
@@ -46,12 +54,46 @@ jobs:
             mkdir -p "artifacts/compiled_contracts/IS_DEV/$name"
           done
 
+      # Two settings in .lamingtonrc are right for a developer at a terminal and
+      # wrong for CI, and lamington has no flag to override either from the
+      # command line (Alien-Worlds/lamington#38), so they are patched in place.
+      #
+      # bailOnFailure stops the suite at the first failure. Locally that saves a
+      # wait you were about to interrupt anyway. In CI the runner is already paid
+      # for, and stopping early means a red build reports a handful of passes out
+      # of the whole suite and tells you nothing about whether the rest still
+      # pass - which is the first question anyone asks of a red build.
+      #
+      # The List reporter announces each test and then reports it, so it costs two
+      # lines per test and about two thirds of the log. Spec carries the same
+      # names and durations on one line each, nested under their describes.
+      - name: Report every failure, not just the first
+        run: |
+          jq '.bailOnFailure = false | .reporter = "Spec"' .lamingtonrc > .lamingtonrc.ci
+          mv .lamingtonrc.ci .lamingtonrc
+          git diff --stat .lamingtonrc
+
+      # No cache of artifacts/compiled_contracts here, though it looks like the
+      # obvious win: this repository compiles twenty-seven contracts and most pull
+      # requests touch no C++ at all. It was tried in eosdac-contracts, on run
+      # 34594298990, and it does nothing. The cache restores correctly - the log
+      # reads "Cache restored successfully" - and lamington then recompiles every
+      # contract regardless, because of how it decides one is unchanged
+      # (contractCompiling.ts):
+      #
+      #     prevModTime.getUTCMilliseconds() != this.modDate.getMilliseconds()
+      #
+      # That compares the milliseconds component of the two timestamps, 0 to 999,
+      # rather than the timestamps (Alien-Worlds/lamington#33). A fresh checkout
+      # stamps every source file with the checkout time, so the component is
+      # effectively random and a restored artifact is called stale almost every
+      # time. Worth revisiting once #33 is fixed, at which point it is free.
       - name: Build contracts and run the full suite
         run: yarn test
 
       - name: Upload the chain and test logs
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-logs
           path: .lamington/
