@@ -42,18 +42,6 @@ jobs:
       - name: Verify the test runner loads
         run: yarn lamington --version
 
-      # eosio-cpp runs as root in the container and would otherwise create these
-      # directories root-owned, so Lamington cannot write its .mod.json stamp.
-      # Invisible on macOS, where Docker Desktop maps ownership.
-      - name: Pre-create the contract output directories
-        run: |
-          node -e '
-            const { include } = JSON.parse(require("fs").readFileSync(".lamingtonrc"));
-            include.forEach((f) => process.stdout.write(f.replace(/\.cpp$/, "") + "\n"));
-          ' | while read -r name; do
-            mkdir -p "artifacts/compiled_contracts/IS_DEV/$name"
-          done
-
       # Two settings in .lamingtonrc are right for a developer at a terminal and
       # wrong for CI, and lamington has no flag to override either from the
       # command line (Alien-Worlds/lamington#38), so they are patched in place.
@@ -90,6 +78,30 @@ jobs:
       # time. Worth revisiting once #33 is fixed, at which point it is free.
       - name: Build contracts and run the full suite
         run: yarn test
+
+      # Guards Alien-Worlds/lamington#69, which made this repository unbuildable on
+      # Linux: eosio-cpp ran as root in the container, so the output directories
+      # and the artifacts came back root-owned and lamington could not write its
+      # .mod.json build stamp. Fixed in lamington v1.5.2, which is why the
+      # pre-create workaround that used to sit above the build is gone.
+      #
+      # Kept as a standing assertion rather than deleted along with the
+      # workaround: the failure is invisible on macOS, because Docker Desktop
+      # maps ownership through its VM, so CI is the only place a regression
+      # would ever show.
+      - name: Assert the build artifacts belong to the build user
+        # Runs even when the suite is red. This asserts a property of the build,
+        # not of the tests, and a flaky test should not cost us the evidence.
+        if: always()
+        run: |
+          strays=$(find artifacts/compiled_contracts -not -user "$(id -u)" -printf '%u %p\n' 2>/dev/null)
+          if [ -n "$strays" ]; then
+            echo "build artifacts are not owned by $(id -u), the user that ran the build:" >&2
+            echo "$strays" | head -20 >&2
+            echo "this is the lamington#69 regression; see the note above this step." >&2
+            exit 1
+          fi
+          echo "all build artifacts owned by $(id -u)"
 
       - name: Upload the chain and test logs
         if: failure()
