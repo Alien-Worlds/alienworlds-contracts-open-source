@@ -43,7 +43,7 @@
   "dependencies": {
     "eosio-helpers": "^0.1.15",
     "eosjs": "^22.0.0",
-    "node-fetch": "2.6",
+    "node-fetch": "3.3",
     "sha256-uint8array": "^0.10.1",
     "tsc": "^2.0.3"
   },
